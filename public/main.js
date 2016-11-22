@@ -51,7 +51,36 @@ window.onload = function init() {
     })
     });
 
+ //Instantiate with some options and add the Control
+ var geocoder = new Geocoder('nominatim', {
+     provider: 'photon',
+     lang: 'en',
+     placeholder: 'Search for ...',
+     limit: 5,
+     debug: true,
+     autoComplete: true,
+     keepOpen: true
+ });
+ map.addControl(geocoder);
 
+
+
+ /**
+* Popup
+**/
+ var container = $('#popup'),
+     content = $('popup-content'),
+     closer = $('popup-closer'),
+     overlay = new ol.Overlay({
+         element: container,
+         offset: [0, -40]
+     });
+ closer.onclick = function () {
+     overlay.setPosition(undefined);
+     closer.blur();
+     return false;
+ };
+ map.addOverlay(overlay);
 }
 
 
