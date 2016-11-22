@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+  <head>
+      <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+      <!--<script src="http://openlayers.org/en/v3.17.1/build/ol.js">
+      </script>-->
+      <script type="text/javascript" src="ol-debug.js">
+      </script><link rel="stylesheet" href="http://openlayers.org/en/v3.17.1/css/ol.css" type="text/css" media="screen">
+
+
+      <script src="/socket.io/socket.io.js"></script>
+      <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+      <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+      
+    <title>Land App</title>
+    <style>
+      /** { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }*/
+    </style>
+  </head>
+  <body>
+
+      <div class="chat page">
+          <form action="">
+              <nav class="navbar navbar-default">
+                  <div class="container-fluid">
+                      <div class="navbar-header">
+                          <a class="navbar-brand" href="#">Land App</a>
+                      </div>
+                      <ul class="nav navbar-nav">
+                          <li class="active"><a href="#">Home</a></li>
+                          <li><a href="#">File</a></li>
+                          <li><a href="#">Page 2</a></li>
+                          <li><a href="#">Page 3</a></li>
+                      </ul>
+                  </div>
+              </nav>
+
+              <div class="col-xs-12">
+                  <div class="col-xs-3" style="float:left;">
+                      <div class="panel panel-default">
+                          <div class="panel-body">
+                              <label for="usr">Search</label>
+                              <input type="text" class="form-control" id="txtSearch">
+                              <br />
+                              <br />
+                              <button id="btnAddLayer" onclick="addLayer();" class="btn btn-primary">Add Layer</button>
+                              <br />
+                              <br />
+                              <button id="btnDrawPolygon" onclick="drawPolygon('Polygon');" class="btn btn-primary">Polygon</button>
+
+                          </div>
+                      </div>
+
+                      <div class="panel panel-default">
+                          <div class="panel-body">
+                              <label>Chat</label>
+                              <ul id="messages"></ul>
+                              <input type="text" placeholder="Type here..." class="form-control" id="m" autocomplete="off" />
+                              <br />
+                              <button id="btnSend" class="btn btn-default">Send</button>
+                          </div>
+                      </div>
+                  </div>
+
+
+                  <div id=map class="col-xs-9" style="float:right;"></div>
+
+              </div>
+
+          </form>
+      </div>
+
+
+        <script>
+            var socket = io();
+            $('form').submit(function () {
+                socket.emit('chat message', $('#m').val());
+                $('#m').val('');
+                
+                return false;
+            });
+
+            socket.on('chat message', function (msg) {
+                $('#messages').append($('<li>').text(msg));
+            });
+
+            socket.on('new polygon', function (msg) {
+
+                var feature = new ol.Feature({
+                    geometry: new ol.geom.Polygon([msg])
+                });
+
+                var layers = map.getLayers();
+
+                //layers.forEach(function (layer) {
+                //    if (layer.get('name') == 'my_layer_name') {
+                //        layer.addFeature(feature);
+                //    }
+                //})
+                //layers[1].addFeature(feature);
+
+                //for (var layer in layers) {
+                //    if (layer.get('name') == 'my_layer_name')
+                //        layer.addFeature(feature);
+                        
+                //}
+            });
+            
+</script>
+
+      <script type="text/javascript" src="main.js"></script>
+  </body>
+</html>
