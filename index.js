@@ -39,6 +39,17 @@ io.on('connection', function (socket) {
         io.emit('new polygon', msg);
     });
 
+    socket.on('new point', function (msg) {
+        io.emit('new point', msg);
+    });
+
+    socket.on('new circle', function (msg) {
+        io.emit('new circle', msg);
+    });
+
+    socket.on('new linestring', function (msg) {
+        io.emit('new linestring', msg);
+    });
 });
 
 

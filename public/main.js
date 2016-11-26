@@ -2,42 +2,21 @@
 
 var source = new ol.source.Vector({ wrapX: false });
 
-source.set("name", "my_layer_name");
-
 
 
 window.onload = function init() {
 
-
     //create a base vector layer to draw on
     var vector = new ol.layer.Vector({
         source: source,
-        style: new ol.style.Style({
-        fill: new ol.style.Fill({
-            color: 'rgba(255, 255, 255, 0.2)'
-        }),
-        stroke: new ol.style.Stroke({
-            color: '#ffcc33',
-            width: 2
-        }),
-        image: new ol.style.Circle({
-            radius: 7,
-            fill: new ol.style.Fill({
-                color: '#ffcc33'
-            })
-        })
-    })
     });
 
     var raster = new ol.layer.Tile({
         source: new ol.source.OSM()
     });
 
-
-
-
     //create map
- map = new ol.Map({
+    map = new ol.Map({
     layers: [raster, vector],
     target: 'map',
     controls: ol.control.defaults({
@@ -46,11 +25,12 @@ window.onload = function init() {
         })
     }),
     view: new ol.View({
-        center: [0, 0],
+        center: [0,0],
         zoom: 2
     })
     });
 
+ //https://github.com/jonataswalker/ol3-geocoder
  //Instantiate with some options and add the Control
  var geocoder = new Geocoder('nominatim', {
      provider: 'photon',
@@ -64,13 +44,13 @@ window.onload = function init() {
  map.addControl(geocoder);
 
 
-
+    //https://github.com/jonataswalker/ol3-geocoder
  /**
 * Popup
 **/
- var container = $('#popup'),
-     content = $('popup-content'),
-     closer = $('popup-closer'),
+ var container = document.getElementById('popup'),
+     content = document.getElementById('popup-content'),
+     closer = document.getElementById('popup-closer'),
      overlay = new ol.Overlay({
          element: container,
          offset: [0, -40]
@@ -81,87 +61,52 @@ window.onload = function init() {
      return false;
  };
  map.addOverlay(overlay);
-}
 
+};
 
-function addLayer() {
-    var layer = prompt("Please enter a layer name");
+function redrawShape(geom) {
+    var feature = new ol.Feature({
+        name: "Thing",
+        geometry: geom
+    });
 
-    if (layer != null) {
-        var vector = new ol.layer.Vector({
-            title:layer,
-            source: source,
-            style: new ol.style.Style({
-                fill: new ol.style.Fill({
-                    color: 'rgba(255, 255, 255, 0.2)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: '#ffcc33',
-                    width: 2
-                }),
-                image: new ol.style.Circle({
-                    radius: 7,
-                    fill: new ol.style.Fill({
-                        color: '#ffcc33'
-                    })
-                })
-            })
-        });
-
-        map.addLayer(layer);
-        
-    }
+    source.addFeature(feature);
 }
 
     var draw; // global so we can remove it later
-    function drawPolygon(value) {
-        
-            var geometryFunction, maxPoints;
-            if (value === 'Square') {
-                value = 'Circle';
-                geometryFunction = ol.interaction.Draw.createRegularPolygon(4);
-            } else if (value === 'Box') {
-                value = 'LineString';
-                maxPoints = 2;
-                geometryFunction = function (coordinates, geometry) {
-                    if (!geometry) {
-                        geometry = new ol.geom.Polygon(null);
-                    }
-                    var start = coordinates[0];
-                    var end = coordinates[1];
-                    geometry.setCoordinates([
-                        [start, [start[0], end[1]], end, [end[0], start[1]], start]
-                    ]);
-                    return geometry;
-                };
-            }
-            var layers = map.getLayers();
+    function drawShape(value) {
+
+        var value = value;
+        if (value !== 'None') {
             draw = new ol.interaction.Draw({
                 source: source,
-                type: value,
-                geometryFunction: geometryFunction,
-                maxPoints: maxPoints
+                type: /** @type {ol.geom.GeometryType} */ (value)
             });
-            
             map.addInteraction(draw);
 
             draw.on('drawend', function (event) {
 
                 // Get the array of features
-                var features = source.getFeatures();
+                var feature = event.feature
 
-                if (features.length != 0) {
-                    var last_element = features[features.length - 1];
-
-                    console.log(last_element.getGeometry().getCoordinates());
-                    socket.emit('new polygon', last_element.getGeometry().getCoordinates());
-                    socket.emit('chat message', last_element.getGeometry().getCoordinates());
+                map.removeInteraction(draw);
+                switch (value) {
+                    case 'Polygon':
+                        socket.emit('new polygon', feature.getGeometry().getCoordinates());
+                        break;
+                    case 'Circle':
+                        socket.emit('new circle', feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter());
+                        break;
+                    case 'LineString':
+                        socket.emit('new linestring', feature.getGeometry().getCoordinates());
+                        break;
+                    case 'Point':
+                        socket.emit('new point', feature.getGeometry().getCoordinates());
+                        break;
                 }
+
             });
-
+        }
     }
-
-    
-
 
     

@@ -46,14 +46,21 @@
                   <div class="col-xs-3" style="float:left;">
                       <div class="panel panel-default">
                           <div class="panel-body">
+                              <br />
+                              <br />
                              
-                              <br />
-                              <br />
-                              <button id="btnAddLayer" onclick="addLayer();" class="btn btn-primary">Add Layer</button>
-                              <br />
-                              <br />
-                              <button id="btnDrawPolygon" onclick="drawPolygon('Polygon');" class="btn btn-primary">Polygon</button>
-
+                              <div class="dropdown">
+                              <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                  Draw Feature
+                                  <span class="caret"></span>
+                              </button>
+                              <ul class="dropdown-menu" id="dropdownshapes" aria-labelledby="dropdownMenu1">
+                                  <li><a  onclick="drawShape('Point');" href="#">Point</a></li>
+                                  <li><a onclick="drawShape('Polygon');" href="#">Polygon</a></li>
+                                  <li><a onclick="drawShape('LineString');" href="#">LineString</a></li>
+                                  <li><a onclick="drawShape('Circle');" href="#">Circle</a></li>
+                              </ul>
+                              </div>
                           </div>
                       </div>
 
@@ -95,24 +102,28 @@
 
             socket.on('new polygon', function (msg) {
 
-                var feature = new ol.Feature({
-                    geometry: new ol.geom.Polygon([msg])
-                });
+                var geom = new ol.geom.Polygon(msg);
+                redrawShape(geom);
+            });
 
-                var layers = map.getLayers();
+            socket.on('new circle', function (msg) {
+                var radius = msg.substr(0, msg.indexOf(','));
+                var centerString = msg.substring(msg.indexOf(",") + 1);
+                var centerArray = centerString.split(',').map(Number);
+                var geom = new ol.geom.Circle([centerArray[0],centerArray[1]], radius);
+                redrawShape(geom);
+            });
 
-                //layers.forEach(function (layer) {
-                //    if (layer.get('name') == 'my_layer_name') {
-                //        layer.addFeature(feature);
-                //    }
-                //})
-                //layers[1].addFeature(feature);
+            socket.on('new linestring', function (msg) {
 
-                //for (var layer in layers) {
-                //    if (layer.get('name') == 'my_layer_name')
-                //        layer.addFeature(feature);
-                        
-                //}
+                var geom = new ol.geom.LineString(msg);
+                redrawShape(geom);
+            });
+
+            socket.on('new point', function (msg) {
+
+                var geom = new ol.geom.Point(msg);
+                redrawShape(geom);
             });
             
 </script>
