@@ -15,8 +15,10 @@ window.onload = function init() {
         source: new ol.source.OSM()
     });
 
+
     //create map
     map = new ol.Map({
+    interactions: ol.interaction.defaults().extend([select, modify]),
     layers: [raster, vector],
     target: 'map',
     controls: ol.control.defaults({
@@ -61,6 +63,15 @@ window.onload = function init() {
      return false;
  };
  map.addOverlay(overlay);
+
+ var select = null;  // ref to currently selected interaction
+
+ // select interaction working on "singleclick"
+ var selectSingleClick = new ol.interaction.Select();
+ map.addInteraction(selectSingleClick);
+    
+
+
 
 };
 
