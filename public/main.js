@@ -18,7 +18,7 @@ window.onload = function init() {
 
     //create map
     map = new ol.Map({
-    interactions: ol.interaction.defaults().extend([select, modify]),
+    //interactions: ol.interaction.defaults().extend([select, modify]),
     layers: [raster, vector],
     target: 'map',
     controls: ol.control.defaults({
@@ -68,12 +68,31 @@ window.onload = function init() {
 
  // select interaction working on "singleclick"
  var selectSingleClick = new ol.interaction.Select();
+    selectSingleClick.on('select', function (e) {
+        var feature = e.selected[0];
+        if (feature != undefined) {
+            setArea(feature.getGeometry().getArea());
+        } else {
+            removeArea()
+        }
+        
+ });
+   
  map.addInteraction(selectSingleClick);
-    
+ 
 
 
 
 };
+
+function removeArea() {
+    document.getElementById("area").innerHTML = "Nothing Selected";
+}
+
+function setArea(area) {
+    var areaSqKm = Math.round(area / 1000000 * 100) / 100;
+    document.getElementById("area").innerHTML = "Selected Area: " + areaSqKm + " km<sup>2</sup>";
+}
 
 function redrawShape(geom) {
     var feature = new ol.Feature({
