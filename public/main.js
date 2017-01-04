@@ -82,7 +82,6 @@ window.onload = function init() {
  
 
 
-
 };
 
 function removeArea() {

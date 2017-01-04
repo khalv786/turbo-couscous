@@ -4,8 +4,24 @@ var fs = require('fs');
 var path = require('path');
 var app = express();
 var http = require('http').Server(app);
-
+var results = [];
 var numUsers = 0;
+
+var pg = require("pg");
+var connectionString = "postgres://awsuser:Harbour245@landapp.crxi70wzgj6y.eu-central-1.rds.amazonaws.com:5432/LandAppFiles"
+
+
+var client = new pg.Client(connectionString);
+client.connect();
+
+var query = client.query("SELECT * FROM maps");
+query.on('row', function (row) {
+    console.log(row);
+});
+
+query.on('end', function () {
+    client.end();
+});
 
 app.use(express.static('public'));
 
@@ -31,11 +47,17 @@ var io = require('socket.io')(http);
 io.on('connection', function (socket) {
 
 
+
     socket.on('chat message', function (msg) {
         io.emit('chat message', msg);
     });
 
     socket.on('new polygon', function (msg) {
+        var mapid = 1;
+        var query = client.query("Insert into features (geometry, mapid) VALUES(ST_GeomFromText(' + msg + '),1)");
+        query.on('row', function (row) {
+            console.log(row);
+        });
         io.emit('new polygon', msg);
     });
 
@@ -58,4 +80,4 @@ io.on('connection', function (socket) {
 
     http.listen(3000, function () {
         console.log('listening on *:3000');
-    });
+});
