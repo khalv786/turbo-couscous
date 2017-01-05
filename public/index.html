@@ -11,6 +11,8 @@
       <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
       <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
       <script src="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.js"></script>
+      <script src="turf.min.js"></script>
+      <script src="https://cdn.rawgit.com/bjornharrtell/jsts/gh-pages/1.2.0/jsts.min.js"></script>
       
     <title>Land App</title>
     <style>
@@ -56,6 +58,9 @@
                                   <li><a onclick="drawShape('Circle');" href="#">Circle</a></li>
                               </ul>
                               </div>
+                              <br />
+                              <br />
+                              <button type="button"class="btn btn-danger" onclick="bufferfeature();">Buffer</button>
                           </div>
                       </div>
                       <div class="alert alert-info" id="area"></div>
@@ -95,6 +100,11 @@
             socket.on('chat message', function (msg) {
                 $('#messages').append($('<li>').text(msg));
             });
+
+            socket.on('delete feature', function (msg) {
+                removeFeature(msg);
+            });
+
 
             socket.on('new polygon', function (msg) {
 

@@ -2,7 +2,9 @@
 
 var source = new ol.source.Vector({ wrapX: false });
 
+var FeatureToBuffer;
 
+var selectedFeatureID;
 
 window.onload = function init() {
 
@@ -14,6 +16,8 @@ window.onload = function init() {
     var raster = new ol.layer.Tile({
         source: new ol.source.OSM()
     });
+
+ 
 
 
     //create map
@@ -71,9 +75,15 @@ window.onload = function init() {
     selectSingleClick.on('select', function (e) {
         var feature = e.selected[0];
         if (feature != undefined) {
+            FeatureToBuffer = feature;
+            selectedFeatureID = feature.id; 
             setArea(feature.getGeometry().getArea());
+       
+            //var properties = event.element.getProperties();
+
         } else {
             removeArea()
+            FeatureToBuffer = null;
         }
         
  });
@@ -83,6 +93,81 @@ window.onload = function init() {
 
 
 };
+
+function bufferfeature() {
+    //if a feature is selected
+    if (FeatureToBuffer != null) {
+        //loop until a numeric value is entered
+        do {
+            var bufferAmount = parseInt(window.prompt("Please enter a value to buffer by in metres", ""), 10);
+        } while (isNaN(bufferAmount));
+
+        //create parser
+        var parser = new jsts.io.OL3Parser();
+        //ask parser to read the geometry of the feature
+        var jstsGeom = parser.read(FeatureToBuffer.getGeometry());
+        // buffer the feature by the buffer amount
+        var buffered = jstsGeom.buffer(bufferAmount);
+        // convert back from JSTS and replace the geometry on the feature
+        FeatureToBuffer.setGeometry(parser.write(buffered));
+        removeSelectedFeature();
+        var value = FeatureToBuffer.getGeometry().getType();
+        switch (value) {
+            case 'Polygon':
+                socket.emit('new polygon', FeatureToBuffer.getGeometry().getCoordinates());
+                break;
+            case 'Circle':
+                socket.emit('new circle', FeatureToBuffer.getGeometry().getRadius() + "," + FeatureToBuffer.getGeometry().getCenter());
+                break;
+            case 'LineString':
+                socket.emit('new linestring', FeatureToBuffer.getGeometry().getCoordinates());
+                break;
+            case 'Point':
+                socket.emit('new point', FeatureToBuffer.getGeometry().getCoordinates());
+                break;
+        }
+        //socket.emit('buffered shape', FeatureToBuffer);
+
+        
+    } else {
+        //if no feature is selected on the map
+        alert("No feature selected");
+    }
+     
+}
+
+function removeSelectedFeature() {
+    var features = source.getFeatures();
+    if (features != null && features.length > 0) {
+        for (x in features) {
+            var properties = features[x].getProperties();
+            var id = properties.id;
+            if (id == selectedFeatureID) {
+                source.removeFeature(features[x]);
+                socket.emit('delete feature', selectedFeatureID);
+                break;
+            }
+        }
+    }
+}
+
+
+function removeFeature(deletedFeatureID) {
+    var features = source.getFeatures();
+    if (features != null && features.length > 0) {
+        for (x in features) {
+            var id = x.id;
+            if (deletedFeatureID == id) {
+                source.removeFeature(features[x]);
+                break;
+            }
+        }
+    }
+}
+
+function addFeature(msg) {
+
+}
 
 function removeArea() {
     document.getElementById("area").innerHTML = "Nothing Selected";
