@@ -11,7 +11,6 @@
       <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
       <link href="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.min.css" rel="stylesheet">
       <script src="//cdn.jsdelivr.net/openlayers.geocoder/latest/ol3-geocoder.js"></script>
-      <script src="turf.min.js"></script>
       <script src="https://cdn.rawgit.com/bjornharrtell/jsts/gh-pages/1.2.0/jsts.min.js"></script>
       
     <title>Land App</title>
@@ -90,6 +89,8 @@
 
         <script>
             var socket = io();
+            
+            //socket.connect("http://localhost", { 'force new connection': true });
             $('form').submit(function () {
                 socket.emit('chat message', $('#m').val());
                 $('#m').val('');
@@ -109,7 +110,8 @@
             socket.on('new polygon', function (msg) {
 
                 var geom = new ol.geom.Polygon(msg);
-                redrawShape(geom);
+                console.log(geom);
+                redrawShape(geom);    
             });
 
             socket.on('new circle', function (msg) {
@@ -130,6 +132,10 @@
 
                 var geom = new ol.geom.Point(msg);
                 redrawShape(geom);
+            });
+            socket.on('newID', function (msg) {
+
+                setNewID(msg);
             });
             
 </script>

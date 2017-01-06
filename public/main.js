@@ -1,10 +1,14 @@
 ﻿var map;
 
-var source = new ol.source.Vector({ wrapX: false });
+var source = new ol.source.Vector({
+    wrapX: false,
+});
 
-var FeatureToBuffer;
+var SelectedFeature;
 
 var selectedFeatureID;
+
+var newID;
 
 window.onload = function init() {
 
@@ -75,8 +79,7 @@ window.onload = function init() {
     selectSingleClick.on('select', function (e) {
         var feature = e.selected[0];
         if (feature != undefined) {
-            FeatureToBuffer = feature;
-            selectedFeatureID = feature.id; 
+            SelectedFeature = feature; 
             setArea(feature.getGeometry().getArea());
        
             //var properties = event.element.getProperties();
@@ -89,14 +92,12 @@ window.onload = function init() {
  });
    
  map.addInteraction(selectSingleClick);
- 
-
-
 };
+
 
 function bufferfeature() {
     //if a feature is selected
-    if (FeatureToBuffer != null) {
+    if (SelectedFeature != null) {
         //loop until a numeric value is entered
         do {
             var bufferAmount = parseInt(window.prompt("Please enter a value to buffer by in metres", ""), 10);
@@ -105,30 +106,28 @@ function bufferfeature() {
         //create parser
         var parser = new jsts.io.OL3Parser();
         //ask parser to read the geometry of the feature
-        var jstsGeom = parser.read(FeatureToBuffer.getGeometry());
+        var jstsGeom = parser.read(SelectedFeature.getGeometry());
         // buffer the feature by the buffer amount
         var buffered = jstsGeom.buffer(bufferAmount);
         // convert back from JSTS and replace the geometry on the feature
-        FeatureToBuffer.setGeometry(parser.write(buffered));
-        removeSelectedFeature();
-        var value = FeatureToBuffer.getGeometry().getType();
+        SelectedFeature.setGeometry(parser.write(buffered));
+       // removeSelectedFeature();
+        var value = SelectedFeature.getGeometry().getType();
         switch (value) {
             case 'Polygon':
-                socket.emit('new polygon', FeatureToBuffer.getGeometry().getCoordinates());
+                console.log(SelectedFeature.getGeometry().getCoordinates());
+                socket.emit('new polygon', SelectedFeature.getGeometry().getCoordinates());
                 break;
             case 'Circle':
-                socket.emit('new circle', FeatureToBuffer.getGeometry().getRadius() + "," + FeatureToBuffer.getGeometry().getCenter());
+                socket.emit('new circle', SelectedFeature.getGeometry().getRadius() + "," + SelectedFeature.getGeometry().getCenter());
                 break;
             case 'LineString':
-                socket.emit('new linestring', FeatureToBuffer.getGeometry().getCoordinates());
+                socket.emit('new linestring', SelectedFeature.getGeometry().getCoordinates());
                 break;
             case 'Point':
-                socket.emit('new point', FeatureToBuffer.getGeometry().getCoordinates());
+                socket.emit('new point', SelectedFeature.getGeometry().getCoordinates());
                 break;
-        }
-        //socket.emit('buffered shape', FeatureToBuffer);
-
-        
+        }      
     } else {
         //if no feature is selected on the map
         alert("No feature selected");
@@ -136,15 +135,16 @@ function bufferfeature() {
      
 }
 
+
 function removeSelectedFeature() {
     var features = source.getFeatures();
     if (features != null && features.length > 0) {
         for (x in features) {
-            var properties = features[x].getProperties();
-            var id = properties.id;
-            if (id == selectedFeatureID) {
+            var coordinates = features[x].getGeometry().getCoordinates();
+
+            if (SelectedFeature.getGeometry().getCoordinates() == coordinates) {
                 source.removeFeature(features[x]);
-                socket.emit('delete feature', selectedFeatureID);
+                socket.emit('delete feature', x);
                 break;
             }
         }
@@ -152,12 +152,12 @@ function removeSelectedFeature() {
 }
 
 
-function removeFeature(deletedFeatureID) {
+function removeFeature(deletedFeature) {
     var features = source.getFeatures();
     if (features != null && features.length > 0) {
         for (x in features) {
-            var id = x.id;
-            if (deletedFeatureID == id) {
+            //var id = x.id;
+            if (deletedFeature.getGeometry().getCoordinates() == features[x].getGeometry().getCoordinates()) {
                 source.removeFeature(features[x]);
                 break;
             }
@@ -165,9 +165,6 @@ function removeFeature(deletedFeatureID) {
     }
 }
 
-function addFeature(msg) {
-
-}
 
 function removeArea() {
     document.getElementById("area").innerHTML = "Nothing Selected";
@@ -179,13 +176,17 @@ function setArea(area) {
 }
 
 function redrawShape(geom) {
+
     var feature = new ol.Feature({
+        //id: newID,
         name: "Thing",
         geometry: geom
     });
+    
 
     source.addFeature(feature);
 }
+
 
     var draw; // global so we can remove it later
     function drawShape(value) {
@@ -195,6 +196,7 @@ function redrawShape(geom) {
             draw = new ol.interaction.Draw({
                 source: source,
                 type: /** @type {ol.geom.GeometryType} */ (value)
+
             });
             map.addInteraction(draw);
 
@@ -202,11 +204,16 @@ function redrawShape(geom) {
 
                 // Get the array of features
                 var feature = event.feature
-
+                //socket.emit('newID', feature.getId);
+                var newFeature = feature;
+                //console.log(feature.getId());
                 map.removeInteraction(draw);
                 switch (value) {
                     case 'Polygon':
+                        
+                        console.log(feature.getGeometry().getCoordinates());
                         socket.emit('new polygon', feature.getGeometry().getCoordinates());
+                       // console.log(feature);
                         break;
                     case 'Circle':
                         socket.emit('new circle', feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter());

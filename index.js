@@ -8,19 +8,20 @@ var results = [];
 var numUsers = 0;
 
 var pg = require("pg");
+
 var connectionString = "postgres://awsuser:Harbour245@landapp.crxi70wzgj6y.eu-central-1.rds.amazonaws.com:5432/LandAppFiles"
 
-
 var client = new pg.Client(connectionString);
-client.connect();
+
+client.connect(function (err) {
+
+    if (err) console.log(err)
+})
 
 var query = client.query("SELECT * FROM maps");
+var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('hi', 1)");
 query.on('row', function (row) {
     console.log(row);
-});
-
-query.on('end', function () {
-    client.end();
 });
 
 app.use(express.static('public'));
@@ -42,29 +43,40 @@ app.get('/', function (req, res) {
 var io = require('socket.io')(http);
 
 
+function connectToDb() {
 
+    var pg = require("pg");
+    var connectionString = "postgres://awsuser:Harbour245@landapp.crxi70wzgj6y.eu-central-1.rds.amazonaws.com:5432/LandAppFiles"
+
+
+    var client = new pg.Client(connectionString);
+
+    client.connect(function (err)
+    {
+        
+        if (err) console.log(err)
+    })
+    
+}
 
 io.on('connection', function (socket) {
 
+    
 
+    socket.on('newID', function (msg) {
+        io.emit('newID', msg);
+    });
 
     socket.on('chat message', function (msg) {
         io.emit('chat message', msg);
     });
 
     socket.on('new polygon', function (msg) {
-        //var mapid = 1;
-        //var query = client.query("Insert into features (geometry, mapid) VALUES(ST_GeomFromText(' + msg + '),1)");
-        //query.on('row', function (row) {
-        //    console.log(row);
-        //});
-        //query.on('end', function () {
-        //    client.end();
-        //});
-        io.emit('new polygon', msg);
-        // Use node's db injection format to filter incoming data
-        //client.query('SELECT ST_AsText((ST_Dump('"+ msg + "')).geom)FROM jacksonco_taxlotsb WHERE gid = 90917;');
-        //client.query('INSERT INTO features (geometry, mapid) VALUES (?)', msg, 5).on('error', function (err) { if (err) console.log("fail"); })
+        
+        //connectToDb();
+        var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('"+ msg+ "', 1)");
+
+io.emit('new polygon', msg);
     });
 
     socket.on('new point', function (msg) {
