@@ -96,11 +96,18 @@ function newProject() {
 
     socket.emit('subscribe', name);
 
-    socket.emit('send message', {
-        room: name,
-        message: "Some message"
-    });
+    //socket.emit('send message', {
+    //    room: name,
+    //    message: "Some message"
+    //});
 
+}
+
+function openProject() {
+    socket.on('connect', function () {
+        // Connected, let's sign-up for to receive messages for this room
+        socket.emit('room', room);
+    });
 }
 
 

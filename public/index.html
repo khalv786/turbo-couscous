@@ -36,6 +36,7 @@
                           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">File<span class="caret"></span></a>
                           <ul class="dropdown-menu">
                               <li><a onclick="newProject();" href="#">New Project</a></li>
+                              <li><a onclick="openProject();" href="#">Open Project</a></li>
                           </ul>
                       </li>
                   </ul>
@@ -106,6 +107,13 @@
                 //display data.message
             });
 
+            socket.on('new polygon', function (data) {
+                //display data.message
+                var geom = new ol.geom.Polygon(data.message);
+                console.log(geom);
+                redrawShape(geom);
+            });
+
             socket.on('chat message', function (msg) {
                 $('#messages').append($('<li>').text(msg));
             });
@@ -115,12 +123,12 @@
             });
 
 
-            socket.on('new polygon', function (msg) {
+            //socket.on('new polygon', function (msg) {
 
-                var geom = new ol.geom.Polygon(msg);
-                console.log(geom);
-                redrawShape(geom);    
-            });
+            //    var geom = new ol.geom.Polygon(msg);
+            //    console.log(geom);
+            //    redrawShape(geom);    
+            //});
 
             socket.on('new circle', function (msg) {
                 var radius = msg.substr(0, msg.indexOf(','));

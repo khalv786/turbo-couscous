@@ -18,12 +18,6 @@ client.connect(function (err) {
     if (err) console.log(err)
 })
 
-//var query = client.query("SELECT * FROM maps");
-//var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('hi', 1)");
-//query.on('row', function (row) {
-//    console.log(row);
-//});
-
 app.use(express.static('public'));
 
 //app.configure(function () {
@@ -42,6 +36,26 @@ app.get('/', function (req, res) {
 
 var io = require('socket.io')(http);
 
+function returnID(room, callback)
+{
+    client.query("INSERT INTO maps (mapname) VALUES ('" + room + "') RETURNING mapid", function (err, result) {
+        if (err)
+            callback(err, null);
+        else
+            callback(null, result);
+
+    });
+
+}
+
+// function you can use:
+function getSecondPart(str) {
+    return str.split(':')[1];
+}
+// use the function:
+
+
+
 io.on('connection', function (socket) {
 
     socket.on('chat message', function (msg) {
@@ -49,21 +63,39 @@ io.on('connection', function (socket) {
     });
 
     socket.on('subscribe', function (room) {
-        console.log('joining room', room);
-        var query = client.query("INSERT INTO maps (mapname) VALUES ('" + room + "')");
-        var query = client.query("SELECT mapid FROM maps order by mapid desc limit 1", function(err, rows, fields)
-        {
-            if (err) throw err;
 
-            console.log(rows[0]);
-        });  
-        socket.join(row);
+        console.log('joining room', room);
+
+        returnID(room, function (err, data) {
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR : ", err);
+            } else {            
+                // code to execute on data retrieval
+                var id =JSON.stringify(data.rows);
+                id = id.match(/\d+/)[0];
+                console.log("user joined :" + id);
+                socket.join(id);
+            }
+        });
     });
 
     socket.on('send message', function (data) {
         console.log('sending room post', data.room);
         socket.broadcast.to(data.room).emit('conversation private post', {
             message: data.message
+        });
+
+    });
+
+    socket.on('room', function (room) {
+        socket.join(room);
+    });
+
+    socket.on('new polygon', function (msg) {
+        console.log('sending room post', msg.room);
+        socket.broadcast.to(data.room).emit('feature', {
+            message: msg.message
         });
     });
 
