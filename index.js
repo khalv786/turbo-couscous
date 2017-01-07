@@ -18,11 +18,11 @@ client.connect(function (err) {
     if (err) console.log(err)
 })
 
-var query = client.query("SELECT * FROM maps");
-var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('hi', 1)");
-query.on('row', function (row) {
-    console.log(row);
-});
+//var query = client.query("SELECT * FROM maps");
+//var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('hi', 1)");
+//query.on('row', function (row) {
+//    console.log(row);
+//});
 
 app.use(express.static('public'));
 
@@ -42,41 +42,36 @@ app.get('/', function (req, res) {
 
 var io = require('socket.io')(http);
 
-
-function connectToDb() {
-
-    var pg = require("pg");
-    var connectionString = "postgres://awsuser:Harbour245@landapp.crxi70wzgj6y.eu-central-1.rds.amazonaws.com:5432/LandAppFiles"
-
-
-    var client = new pg.Client(connectionString);
-
-    client.connect(function (err)
-    {
-        
-        if (err) console.log(err)
-    })
-    
-}
-
 io.on('connection', function (socket) {
-
-    
-
-    socket.on('newID', function (msg) {
-        io.emit('newID', msg);
-    });
 
     socket.on('chat message', function (msg) {
         io.emit('chat message', msg);
     });
 
+    socket.on('subscribe', function (room) {
+        console.log('joining room', room);
+        var query = client.query("INSERT INTO maps (mapname) VALUES ('" + room + "')");
+        var query = client.query("SELECT mapid FROM maps order by mapid desc limit 1", function(err, rows, fields)
+        {
+            if (err) throw err;
+
+            console.log(rows[0]);
+        });  
+        socket.join(row);
+    });
+
+    socket.on('send message', function (data) {
+        console.log('sending room post', data.room);
+        socket.broadcast.to(data.room).emit('conversation private post', {
+            message: data.message
+        });
+    });
+
     socket.on('new polygon', function (msg) {
-        
-        //connectToDb();
+
         var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('"+ msg+ "', 1)");
 
-io.emit('new polygon', msg);
+        io.emit('new polygon', msg);
     });
 
     socket.on('new point', function (msg) {
@@ -96,10 +91,6 @@ io.emit('new polygon', msg);
     });
 
 });
-
-
-
-
 
     http.listen(3000, function () {
         console.log('listening on *:3000');

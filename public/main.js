@@ -6,9 +6,6 @@ var source = new ol.source.Vector({
 
 var SelectedFeature;
 
-var selectedFeatureID;
-
-var newID;
 
 window.onload = function init() {
 
@@ -93,6 +90,18 @@ window.onload = function init() {
    
  map.addInteraction(selectSingleClick);
 };
+
+function newProject() {
+    var name = prompt("Enter Name of Map");
+
+    socket.emit('subscribe', name);
+
+    socket.emit('send message', {
+        room: name,
+        message: "Some message"
+    });
+
+}
 
 
 function bufferfeature() {
