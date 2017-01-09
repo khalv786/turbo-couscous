@@ -45,21 +45,57 @@ function returnID(room, callback)
             callback(null, result);
 
     });
-
 }
 
-// function you can use:
-function getSecondPart(str) {
-    return str.split(':')[1];
+function getRoomID(room, callback) {
+    client.query("SELECT mapid FROM maps mapname WHERE mapname = ('" + room + "')", function (err, result) {
+        if (err)
+            callback(err, null);
+        else
+            callback(null, result);
+    });
 }
-// use the function:
 
-
+function insertFeature(id, geometry) {
+    var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('" + geometry + "', '" + id + "')");
+}
 
 io.on('connection', function (socket) {
 
     socket.on('chat message', function (msg) {
         io.emit('chat message', msg);
+    });
+
+    socket.on('returnRoomID', function (room) {
+        getRoomID(room, function (err, data) {
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR : ", err);
+            } else {            
+                // code to execute on data retrieval
+                var id = JSON.stringify(data.rows);
+                id = id.match(/\d+/)[0];
+                io.sockets.in(id).emit('new polygon', id);
+            }
+        })
+    });
+
+    socket.on('JoinRoom', function (room) {
+
+        getRoomID(room, function (err, data) {
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR : ", err);
+            } else {            
+                // code to execute on data retrieval
+                var id = JSON.stringify(data.rows);
+                id = id.match(/\d+/)[0];
+                console.log("user joined :" + id);
+                socket.join(id);
+                io.sockets.in(id).emit('send ID to client', id);
+            }
+
+        });
     });
 
     socket.on('subscribe', function (room) {
@@ -74,8 +110,9 @@ io.on('connection', function (socket) {
                 // code to execute on data retrieval
                 var id =JSON.stringify(data.rows);
                 id = id.match(/\d+/)[0];
-                console.log("user joined :" + id);
+                console.log("user created and joined :" + id);
                 socket.join(id);
+                io.sockets.in(id).emit('send ID to client', id);
             }
         });
     });
@@ -88,34 +125,32 @@ io.on('connection', function (socket) {
 
     });
 
-    socket.on('room', function (room) {
-        socket.join(room);
-    });
-
-    socket.on('new polygon', function (msg) {
-        console.log('sending room post', msg.room);
-        socket.broadcast.to(data.room).emit('feature', {
-            message: msg.message
-        });
-    });
-
     socket.on('new polygon', function (msg) {
 
-        var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('"+ msg+ "', 1)");
+        insertFeature(msg.ID, msg.Geometry)
 
-        io.emit('new polygon', msg);
+        io.sockets.in(msg.ID).emit('new polygon', msg.Geometry);
     });
 
     socket.on('new point', function (msg) {
-        io.emit('new point', msg);
+
+        insertFeature(msg.ID, msg.Geometry)
+      
+        io.sockets.in(msg.ID).emit('new point', msg.Geometry);
     });
 
     socket.on('new circle', function (msg) {
-        io.emit('new circle', msg);
+        
+        insertFeature(msg.ID, msg.Geometry)
+
+        io.sockets.in(msg.ID).emit('new circle', msg.Geometry);
     });
 
     socket.on('new linestring', function (msg) {
-        io.emit('new linestring', msg);
+
+        insertFeature(msg.ID, msg.Geometry)
+
+        io.sockets.in(msg.ID).emit('new linestring', msg.Geometry);
     });
 
     socket.on('delete feature', function (msg) {

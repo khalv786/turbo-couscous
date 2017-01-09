@@ -6,6 +6,10 @@ var source = new ol.source.Vector({
 
 var SelectedFeature;
 
+var project;
+
+var projectID;
+
 
 window.onload = function init() {
 
@@ -17,9 +21,6 @@ window.onload = function init() {
     var raster = new ol.layer.Tile({
         source: new ol.source.OSM()
     });
-
- 
-
 
     //create map
     map = new ol.Map({
@@ -92,23 +93,23 @@ window.onload = function init() {
 };
 
 function newProject() {
-    var name = prompt("Enter Name of Map");
+    project = prompt("Enter Name of Map");
+   // socket.disconnect();
+    socket.emit('subscribe', project);
 
-    socket.emit('subscribe', name);
-
-    //socket.emit('send message', {
-    //    room: name,
-    //    message: "Some message"
-    //});
 
 }
 
 function openProject() {
-    socket.on('connect', function () {
-        // Connected, let's sign-up for to receive messages for this room
-        socket.emit('room', room);
-    });
+
+    project = prompt("Enter the room name you would like to join");
+    //socket.disconnect();
+    socket.emit('JoinRoom', project);
 }
+
+function fillID(id) {
+    projectID = id;
+};
 
 
 function bufferfeature() {
@@ -132,7 +133,7 @@ function bufferfeature() {
         switch (value) {
             case 'Polygon':
                 console.log(SelectedFeature.getGeometry().getCoordinates());
-                socket.emit('new polygon', SelectedFeature.getGeometry().getCoordinates());
+               // socket.emit('new polygon', SelectedFeature.getGeometry().getCoordinates());
                 break;
             case 'Circle':
                 socket.emit('new circle', SelectedFeature.getGeometry().getRadius() + "," + SelectedFeature.getGeometry().getCenter());
@@ -167,7 +168,6 @@ function removeSelectedFeature() {
     }
 }
 
-
 function removeFeature(deletedFeature) {
     var features = source.getFeatures();
     if (features != null && features.length > 0) {
@@ -194,12 +194,9 @@ function setArea(area) {
 function redrawShape(geom) {
 
     var feature = new ol.Feature({
-        //id: newID,
         name: "Thing",
         geometry: geom
     });
-    
-
     source.addFeature(feature);
 }
 
@@ -225,20 +222,19 @@ function redrawShape(geom) {
                 //console.log(feature.getId());
                 map.removeInteraction(draw);
                 switch (value) {
-                    case 'Polygon':
+                    case 'Polygon':                       
+                        console.log(projectID + "-" + feature.getGeometry().getCoordinates());
                         
-                        console.log(feature.getGeometry().getCoordinates());
-                        socket.emit('new polygon', feature.getGeometry().getCoordinates());
-                       // console.log(feature);
+                        socket.emit('new polygon', ({ ID : projectID , Geometry :feature.getGeometry().getCoordinates() }));
                         break;
                     case 'Circle':
-                        socket.emit('new circle', feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter());
+                        socket.emit('new circle', ({ ID: projectID, Geometry: feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter() }));
                         break;
                     case 'LineString':
-                        socket.emit('new linestring', feature.getGeometry().getCoordinates());
+                        socket.emit('new linestring', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates() }));
                         break;
                     case 'Point':
-                        socket.emit('new point', feature.getGeometry().getCoordinates());
+                        socket.emit('new point', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates() }));
                         break;
                 }
 

@@ -38,7 +38,10 @@
                               <li><a onclick="newProject();" href="#">New Project</a></li>
                               <li><a onclick="openProject();" href="#">Open Project</a></li>
                           </ul>
+                                                         
                       </li>
+                      
+                      
                   </ul>
               </div>
 
@@ -109,9 +112,13 @@
 
             socket.on('new polygon', function (data) {
                 //display data.message
-                var geom = new ol.geom.Polygon(data.message);
-                console.log(geom);
+                var geom = new ol.geom.Polygon(data);
+                console.log("just geom"+ geom);
                 redrawShape(geom);
+            });
+
+            socket.on('send ID to client', function (data) {
+                fillID(data);
             });
 
             socket.on('chat message', function (msg) {
