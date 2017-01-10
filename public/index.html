@@ -14,16 +14,6 @@
       <script src="https://cdn.rawgit.com/bjornharrtell/jsts/gh-pages/1.2.0/jsts.min.js"></script>
       
     <title>Land App</title>
-    <style>
-      /** { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }*/
-    </style>
   </head>
   <body>
 
@@ -43,6 +33,7 @@
                       
                       
                   </ul>
+                  <a class="navbar-text" id="projectName" href="#"></a>
               </div>
 
 
@@ -62,12 +53,14 @@
                                   <li><a  onclick="drawShape('Point');" href="#">Point</a></li>
                                   <li><a onclick="drawShape('Polygon');" href="#">Polygon</a></li>
                                   <li><a onclick="drawShape('LineString');" href="#">LineString</a></li>
-                                  <li><a onclick="drawShape('Circle');" href="#">Circle</a></li>
                               </ul>
                               </div>
                               <br />
                               <br />
                               <button type="button"class="btn btn-danger" onclick="bufferfeature();">Buffer</button>
+                              <br />
+                              <br />
+                              <button type="button" class="btn btn-danger" onclick="deletefeature();">Delete</button>
                           </div>
                       </div>
                       <div class="alert alert-info" id="area"></div>
@@ -98,7 +91,6 @@
         <script>
             var socket = io();
             
-            //socket.connect("http://localhost", { 'force new connection': true });
             $('form').submit(function () {
                 socket.emit('chat message', $('#m').val());
                 $('#m').val('');
@@ -106,12 +98,7 @@
                 return false;
             });
 
-            socket.on('conversation private post', function (data) {
-                //display data.message
-            });
-
             socket.on('new polygon', function (data) {
-                //display data.message
                 var geom = new ol.geom.Polygon(data);
                 console.log("just geom"+ geom);
                 redrawShape(geom);
@@ -128,14 +115,6 @@
             socket.on('delete feature', function (msg) {
                 removeFeature(msg);
             });
-
-
-            //socket.on('new polygon', function (msg) {
-
-            //    var geom = new ol.geom.Polygon(msg);
-            //    console.log(geom);
-            //    redrawShape(geom);    
-            //});
 
             socket.on('new circle', function (msg) {
                 var radius = msg.substr(0, msg.indexOf(','));
@@ -155,12 +134,7 @@
 
                 var geom = new ol.geom.Point(msg);
                 redrawShape(geom);
-            });
-            //socket.on('newID', function (msg) {
-
-            //    setNewID(msg);
-            //});
-            
+            });            
 </script>
 
       <script type="text/javascript" src="main.js"></script>
