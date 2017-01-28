@@ -193,6 +193,18 @@ function redrawShape(geom) {
     source.addFeature(feature);
 }
 
+function guid() {
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+}
+
+function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+}
+
+
     // global so we can remove it later
     var draw; 
     function drawShape(value) {
@@ -208,7 +220,7 @@ function redrawShape(geom) {
             map.addInteraction(draw);
             //after drawing the feature
             draw.on('drawend', function (event) {
-
+                var id = guid();
                 // retrieve the feature
                 var feature = event.feature
 
@@ -218,16 +230,16 @@ function redrawShape(geom) {
                 //emit the feature and project ID to other clients
                 switch (value) {
                     case 'Polygon':                       
-                        socket.emit('new polygon', ({ ID : projectID , Geometry :feature.getGeometry().getCoordinates() }));
+                        socket.emit('new polygon', ({ ID : projectID , Geometry :feature.getGeometry().getCoordinates(), Guid: id }));
                         break;
                     case 'Circle':
-                        socket.emit('new circle', ({ ID: projectID, Geometry: feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter() }));
+                        socket.emit('new circle', ({ ID: projectID, Geometry: feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter(), Guid: id }));
                         break;
                     case 'LineString':
-                        socket.emit('new linestring', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates() }));
+                        socket.emit('new linestring', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates(), Guid: id }));
                         break;
                     case 'Point':
-                        socket.emit('new point', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates() }));
+                        socket.emit('new point', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates(), Guid: id }));
                         break;
                 }
 

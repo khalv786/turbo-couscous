@@ -50,8 +50,8 @@ function returnMapID(room, callback) {
 }
 
 //insert feature into database
-function insertFeature(id, geometry) {
-    var query = client.query("INSERT INTO features (geometry, mapid) VALUES ('" + geometry + "', '" + id + "')");
+function insertFeature(mapid, geometry, guid) {
+    var query = client.query("INSERT INTO features (geometry, mapid, guid) VALUES ('" + geometry + "', '" + mapid + "', '" + guid + "')");
 }
 
 //update geometry of feature in database
@@ -129,28 +129,28 @@ io.on('connection', function (socket) {
 
     socket.on('new polygon', function (msg) {
 
-        insertFeature(msg.ID, msg.Geometry)
+        insertFeature(msg.ID, msg.Geometry, msg.Guid)
 
         io.sockets.in(msg.ID).emit('new polygon', msg.Geometry);
     });
 
     socket.on('new point', function (msg) {
 
-        insertFeature(msg.ID, msg.Geometry)
+        insertFeature(msg.ID, msg.Geometry, msg.Guid)
 
         io.sockets.in(msg.ID).emit('new point', msg.Geometry);
     });
 
     socket.on('new circle', function (msg) {
 
-        insertFeature(msg.ID, msg.Geometry)
+        insertFeature(msg.ID, msg.Geometry, msg.Guid)
 
         io.sockets.in(msg.ID).emit('new circle', msg.Geometry);
     });
 
     socket.on('new linestring', function (msg) {
 
-        insertFeature(msg.ID, msg.Geometry)
+        insertFeature(msg.ID, msg.Geometry, msg.Guid)
 
         io.sockets.in(msg.ID).emit('new linestring', msg.Geometry);
     });
