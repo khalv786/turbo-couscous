@@ -221,25 +221,27 @@ function s4() {
             //after drawing the feature
             draw.on('drawend', function (event) {
                 var id = guid();
+
                 // retrieve the feature
                 var feature = event.feature
-
+                
                 var newFeature = feature;
+                var type = feature.getGeometry().getType();
                 //remove the draw interaction
                 map.removeInteraction(draw);
                 //emit the feature and project ID to other clients
                 switch (value) {
                     case 'Polygon':                       
-                        socket.emit('new polygon', ({ ID : projectID , Geometry :feature.getGeometry().getCoordinates(), Guid: id }));
+                        socket.emit('new polygon', ({ ID : projectID , Geometry :feature.getGeometry().getCoordinates(), Guid: id, Type: type }));
                         break;
                     case 'Circle':
-                        socket.emit('new circle', ({ ID: projectID, Geometry: feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter(), Guid: id }));
+                        socket.emit('new circle', ({ ID: projectID, Geometry: feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter(), Guid: id, Type: type }));
                         break;
                     case 'LineString':
-                        socket.emit('new linestring', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates(), Guid: id }));
+                        socket.emit('new linestring', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates(), Guid: id, Type: type }));
                         break;
                     case 'Point':
-                        socket.emit('new point', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates(), Guid: id }));
+                        socket.emit('new point', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates(), Guid: id, Type: type }));
                         break;
                 }
 
