@@ -71,10 +71,16 @@ function extractValue(output) {
     return value;
 }
 
-function joinAndEmitProject(id) {
+function returnFeatures(projectID) {
 
-}
+    var query = client.query("SELECT * FROM features where mapid = ('" + projectID + "')", function (err, result) {
+        if (err) throw err;
 
+        // just print the result to the console
+        console.log(result.rows); // outputs: { name: 'brianc' }
+        io.sockets.in(projectID).emit('features', result.rows);
+    });
+       }
 
 io.on('connection', function (socket) {
 
@@ -93,31 +99,42 @@ io.on('connection', function (socket) {
     });
     //when user opens a project
     socket.on('JoinRoom', function (room) {
-        returnMapID(room, function (err, data) {
+        returnMapID(room.Name, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
             } else {            
                 // extract just the value
                 var id = extractValue(data.rows);
+                
+                if (room.CurrentProject != "") {
+                    socket.leave(room.CurrentProject);
+                    console.log("user left room:" + room.CurrentProject);
+                }
                 console.log("user joined :" + id);
                 socket.join(id);
                 io.sockets.in(id).emit('send ID to client', id);
-            }
 
+                var features = returnFeatures(id);
+            }
         });
     });
 
     //to create a new project
     socket.on('new project', function (room) {
 
-        insertMap(room, function (err, data) {
+        insertMap(room.Name, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
             } else {            
                 //extract value
                 var id = extractValue(data.rows);
+                
+                if (room.CurrentProject != "") {
+                    socket.leave(room.CurrentProject);
+                    console.log("user left room:" + room.CurrentProject);
+                }
                 console.log("user created and joined :" + id);
                 //open project
                 socket.join(id);
@@ -126,6 +143,8 @@ io.on('connection', function (socket) {
             }
         });
     });
+
+   
 
     socket.on('new polygon', function (msg) {
 

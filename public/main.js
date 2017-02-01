@@ -5,7 +5,7 @@ var source = new ol.source.Vector({
 });
 var SelectedFeature;
 var project;
-var projectID;
+var projectID = "";
 
 // when the page first loads
 window.onload = function init() {
@@ -93,7 +93,7 @@ function newProject() {
     //prompt for user to enter map name
     project = prompt("Enter Name of Map");
     //emit new project
-    socket.emit('new project', project);
+    socket.emit('new project', { Name: project, CurrentProject: projectID});
     //display project name
     fillProjectLabel();
 }
@@ -103,7 +103,7 @@ function openProject() {
     //enter name of the project the user would like to open
     project = prompt("Enter the room name you would like to join");
     //emit project to open
-    socket.emit('JoinRoom', project);
+    socket.emit('JoinRoom', { Name: project, CurrentProject: projectID});
     //display project name
     fillProjectLabel();
 }
