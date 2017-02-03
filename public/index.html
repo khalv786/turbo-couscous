@@ -99,9 +99,7 @@
             });
 
             socket.on('new polygon', function (data) {
-                var geom = new ol.geom.Polygon(data);
-                console.log("just geom"+ geom);
-                redrawShape(geom);
+                redrawShape(data);
             });
 
             socket.on('send ID to client', function (data) {
@@ -122,26 +120,23 @@
                 var i;
                 for(i = 0; i < msg.length; i++){ 
                     var value = msg[i];
-                    console.log(value.geometry.split());
-                    var geometry = value.geometry;
-                    geometry = JSON.parse("[" + geometry.replace(/'/g, '"') + "]");
-                    console.log(geometry);
-                    switch (value.type) {
-                        
-                        case 'Polygon':                
-                            geom = ol.geom.Polygon(geometry);
-                            redrawShape(geom);
-                            break;
-                        case 'Circle':
-                            //geom = ol.geom.Circle(value[1]);
-                            break;
-                        case 'LineString':
-                            geom = ol.geom.LineString(value[1]);
-                            break;
-                        case 'Point':
-                            geom = ol.geom.Point(value[1]);
-                            break;
-                    }
+                    var format = new ol.format.WKT();
+                    //var wktRepresenation = format.writeGeometry(value.geometry);
+                  //  console.log(geometry);
+                    //switch (value.type) {
+                       // case 'Polygon':
+                            redrawShape(value.geometry);
+                    //        break;
+                    //    case 'Circle':
+                    //        //geom = ol.geom.Circle(value[1]);
+                    //        break;
+                    //    case 'LineString':
+                    //        geom = ol.geom.LineString(value[1]);
+                    //        break;
+                    //    case 'Point':
+                    //        geom = ol.geom.Point(value[1]);
+                    //        break;
+                    //}
                     
                 }
                      

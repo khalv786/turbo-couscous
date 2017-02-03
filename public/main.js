@@ -185,11 +185,8 @@ function setArea(area) {
 
 //redraw shape using the geometry provided
 function redrawShape(geom) {
-
-    var feature = new ol.Feature({
-        name: "Thing",
-        geometry: geom
-    });
+    wkt = new ol.format.WKT;
+    var feature = wkt.readFeature(geom);
     source.addFeature(feature);
 }
 
@@ -229,19 +226,23 @@ function s4() {
                 var type = feature.getGeometry().getType();
                 //remove the draw interaction
                 map.removeInteraction(draw);
+                var ol3Geom = feature.getGeometry();
+                var format = new ol.format.WKT();
+                var wktRepresenation = format.writeGeometry(ol3Geom);  
                 //emit the feature and project ID to other clients
                 switch (value) {
-                    case 'Polygon':                       
-                        socket.emit('new polygon', ({ ID : projectID , Geometry :feature.getGeometry().getCoordinates(), Guid: id, Type: type }));
+                    case 'Polygon': 
+                    
+                        socket.emit('new polygon', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type }));
                         break;
                     case 'Circle':
                         socket.emit('new circle', ({ ID: projectID, Geometry: feature.getGeometry().getRadius() + "," + feature.getGeometry().getCenter(), Guid: id, Type: type }));
                         break;
                     case 'LineString':
-                        socket.emit('new linestring', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates(), Guid: id, Type: type }));
+                        socket.emit('new linestring', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type }));
                         break;
                     case 'Point':
-                        socket.emit('new point', ({ ID: projectID, Geometry: feature.getGeometry().getCoordinates(), Guid: id, Type: type }));
+                        socket.emit('new point', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type }));
                         break;
                 }
 
