@@ -98,7 +98,7 @@
                 return false;
             });
 
-            socket.on('new polygon', function (data) {
+            socket.on('new feature', function (data) {
                 redrawShape(data);
             });
 
@@ -121,47 +121,12 @@
                 for(i = 0; i < msg.length; i++){ 
                     var value = msg[i];
                     var format = new ol.format.WKT();
-                    //var wktRepresenation = format.writeGeometry(value.geometry);
-                  //  console.log(geometry);
-                    //switch (value.type) {
-                       // case 'Polygon':
-                            redrawShape(value.geometry);
-                    //        break;
-                    //    case 'Circle':
-                    //        //geom = ol.geom.Circle(value[1]);
-                    //        break;
-                    //    case 'LineString':
-                    //        geom = ol.geom.LineString(value[1]);
-                    //        break;
-                    //    case 'Point':
-                    //        geom = ol.geom.Point(value[1]);
-                    //        break;
-                    //}
-                    
+                            redrawShape(value.geometry);             
                 }
                      
                     
 });
-
-            socket.on('new circle', function (msg) {
-                var radius = msg.substr(0, msg.indexOf(','));
-                var centerString = msg.substring(msg.indexOf(",") + 1);
-                var centerArray = centerString.split(',').map(Number);
-                var geom = new ol.geom.Circle([centerArray[0],centerArray[1]], radius);
-                redrawShape(geom);
-            });
-
-            socket.on('new linestring', function (msg) {
-
-                var geom = new ol.geom.LineString(msg);
-                redrawShape(geom);
-            });
-
-            socket.on('new point', function (msg) {
-
-                var geom = new ol.geom.Point(msg);
-                redrawShape(geom);
-            });            
+        
 </script>
 
       <script type="text/javascript" src="main.js"></script>

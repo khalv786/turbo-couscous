@@ -144,7 +144,12 @@ io.on('connection', function (socket) {
         });
     });
 
-   
+    socket.on('new feature', function (msg) {
+
+        insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Type)
+
+        io.sockets.in(msg.ID).emit('new feature', msg.Geometry);
+    });
 
     socket.on('new polygon', function (msg) {
 
