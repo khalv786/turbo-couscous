@@ -64,6 +64,8 @@
                           </div>
                       </div>
                       <div class="alert alert-info" id="area"></div>
+                      <br />
+                      <div class="alert alert-info" id="properties"></div>
                       <div class="panel panel-default" style="display: none;">
                           <div class="panel-body">
                               <label>Chat</label>
@@ -98,8 +100,13 @@
                 return false;
             });
 
-            socket.on('new feature', function (data) {
-                redrawShape(data);
+            socket.on('new feature', function (msg) {
+                redrawShape(msg.Geometry, msg.Guid);
+            });
+
+            socket.on('update feature', function (msg) {
+                
+                modifyShape(msg.Geometry, msg.Guid);
             });
 
             socket.on('send ID to client', function (data) {
@@ -121,7 +128,7 @@
                 for(i = 0; i < msg.length; i++){ 
                     var value = msg[i];
                     var format = new ol.format.WKT();
-                            redrawShape(value.geometry);             
+                            redrawShape(value.geometry, value.guid);             
                 }
                      
                     

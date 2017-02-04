@@ -55,8 +55,8 @@ function insertFeature(mapid, geometry, guid, type) {
 }
 
 //update geometry of feature in database
-function updateGeometry(id,oldGeometry, newGeometry, callback) {
-    client.query("UPDATE features SET geometry = '" + newGeometry + "'::text || geometry WHERE  geometry = '" + oldGeometry + "';", function (err, result) {
+function updateFeature(guid, newGeometry, callback) {
+    client.query("UPDATE features SET geometry = '" + newGeometry + "'::text || geometry WHERE  guid = '" + guid + "';", function (err, result) {
         if (err)
             callback(err, null);
         else
@@ -148,41 +148,25 @@ io.on('connection', function (socket) {
 
         insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Type)
 
-        io.sockets.in(msg.ID).emit('new feature', msg.Geometry);
+        io.sockets.in(msg.ID).emit('new feature', ({ Geometry: msg.Geometry, Guid: msg.Guid }));
     });
 
-    socket.on('new polygon', function (msg) {
+    socket.on('update feature', function (msg) {
 
-        insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Type)
+        updateFeature(msg.Geometry, msg.Guid, function (err, data) {
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR : ", err);
+            }
+        });
 
-        io.sockets.in(msg.ID).emit('new polygon', msg.Geometry);
+        io.sockets.in(msg.ID).emit('update feature', ({ Geometry: msg.Geometry, Guid: msg.Guid }));
     });
 
-    socket.on('new point', function (msg) {
-
-        insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Type)
-
-        io.sockets.in(msg.ID).emit('new point', msg.Geometry);
-    });
-
-    socket.on('new circle', function (msg) {
-
-        insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Type)
-
-        io.sockets.in(msg.ID).emit('new circle', msg.Geometry);
-    });
-
-    socket.on('new linestring', function (msg) {
-
-        insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Type)
-
-        io.sockets.in(msg.ID).emit('new linestring', msg.Geometry);
-    });
-
-    
+   
 
     socket.on('update feature geometry', function (msg) {
-        updateGeometry(msg.ID, msg.oldGeometry, msg.newGeometry, function (err, data) {
+        updateGeometry(msg.ID, msg.Guid, msg.NewGeometry, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);

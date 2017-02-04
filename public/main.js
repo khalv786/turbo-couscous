@@ -77,6 +77,8 @@ window.onload = function init() {
             SelectedFeature = feature;
             //display area of feature 
             setArea(feature.getGeometry().getArea());
+            var guid = feature.get("guid");
+            setProperties(guid);
 
         } else {
             //remove area if no feature is selected
@@ -118,12 +120,6 @@ function fillID(id) {
     projectID = id;
 };
 
-//send update geometry to database
-function updateFeatureDatabase(projectID, oldGeom, newGeom) {
-    socket.emit('update feature geometry', ({ ID: projectID, oldGeometry: oldGeom, newGeometry: newGeom}));
-}
-
-
 function bufferfeature() {
     //if a feature is selected
     if (SelectedFeature != null) {
@@ -131,39 +127,26 @@ function bufferfeature() {
         do {
             var bufferAmount = parseInt(window.prompt("Please enter a value to buffer by in metres", ""), 10);
         } while (isNaN(bufferAmount));
-        var oldFeature = SelectedFeature.clone();
+
+        var guid = SelectedFeature.get("guid");
         //create parser
         var parser = new jsts.io.OL3Parser();
         //ask parser to read the geometry of the feature
         var jstsGeom = parser.read(SelectedFeature.getGeometry());
         // buffer the feature by the buffer amount
         var buffered = jstsGeom.buffer(bufferAmount);
-        //
-       // source.removeFeature(SelectedFeature);
-        //vectorLayer.getSource().removeFeature(SelectedFeature);
-        // convert back from JSTS and replace the geometry on the feature
-       // removeOldFeature(oldFeature);
-        SelectedFeature.setGeometry(parser.write(buffered));
-        //update old geometry to new geometry in database
-        updateFeatureDatabase(projectID, oldFeature.getGeometry().getCoordinates(), SelectedFeature.getGeometry().getCoordinates());
         
-        //retrieve the feature type
-        var value = SelectedFeature.getGeometry().getType();
+        // convert back from JSTS and replace the geometry on the feature
+
+        SelectedFeature.setGeometry(parser.write(buffered));
+        var ol3Geom = SelectedFeature.getGeometry();
+        var format = new ol.format.WKT();
+        var wktRepresenation = format.writeGeometry(ol3Geom); 
+        
+        
         //emit to make a new feature for other clients
-        switch (value) {
-            case 'Polygon':                
-                //socket.emit('new polygon', ({ ID: projectID, Geometry: SelectedFeature.getGeometry().getCoordinates() }));
-                break;
-            case 'Circle':
-                socket.emit('new circle', ({ ID: projectID, Geometry: SelectedFeature.getGeometry().getRadius() + "," + SelectedFeature.getGeometry().getCenter() }));
-                break;
-            case 'LineString':
-                socket.emit('new linestring', ({ ID: projectID, Geometry: SelectedFeature.getGeometry().getCoordinates()}));
-                break;
-            case 'Point':
-                socket.emit('new point', ({ ID: projectID, Geometry: SelectedFeature.getGeometry().getCoordinates() }));
-                break;
-        }      
+        socket.emit('update feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: guid }));
+    
     } else {
         //if no feature is selected on the map
         alert("No feature selected");
@@ -183,11 +166,31 @@ function setArea(area) {
     document.getElementById("area").innerHTML = "Selected Area: " + areaSqKm + " km<sup>2</sup>";
 }
 
+function setProperties(property) {
+    document.getElementById("properties").innerHTML = "Guid: " + property;
+}
+
 //redraw shape using the geometry provided
-function redrawShape(geom) {
+function redrawShape(geom, Guid) {
     wkt = new ol.format.WKT;
     var feature = wkt.readFeature(geom);
+    feature.set("guid", Guid);
     source.addFeature(feature);
+}
+
+function modifyShape(geom, Guid) {
+    var features = source.getFeatures();
+    for (var i = 0, l = features.length; i < l; i++) {
+        var feature = features[i];
+        var guid = feature.get("guid")
+        if (guid == Guid) {
+            source.removeFeature(feature);
+           
+        }
+        break;
+        
+    }
+    redrawShape(geom, Guid);
 }
 
 function guid() {
@@ -221,6 +224,7 @@ function s4() {
 
                 // retrieve the feature
                 var feature = event.feature
+                feature.set("guid", id);
                 
                 var newFeature = feature;
                 var type = feature.getGeometry().getType();
@@ -229,7 +233,7 @@ function s4() {
                 var ol3Geom = feature.getGeometry();
                 var format = new ol.format.WKT();
                 var wktRepresenation = format.writeGeometry(ol3Geom);  
-                       //emit the feature and project ID to other clients
+                //emit the feature and project ID to other clients
                 socket.emit('new feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type }));
             });
         }
