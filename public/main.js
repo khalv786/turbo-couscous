@@ -6,12 +6,13 @@ var source = new ol.source.Vector({
 var SelectedFeature;
 var project;
 var projectID = "";
+var vector;
 
 // when the page first loads
 window.onload = function init() {
 
     //create a base vector layer to draw on
-    var vector = new ol.layer.Vector({
+    vector = new ol.layer.Vector({
         source: source,
     });
 
@@ -129,6 +130,7 @@ function bufferfeature() {
         } while (isNaN(bufferAmount));
 
         var guid = SelectedFeature.get("guid");
+  
         //create parser
         var parser = new jsts.io.OL3Parser();
         //ask parser to read the geometry of the feature
@@ -139,10 +141,10 @@ function bufferfeature() {
         // convert back from JSTS and replace the geometry on the feature
 
         SelectedFeature.setGeometry(parser.write(buffered));
+
         var ol3Geom = SelectedFeature.getGeometry();
         var format = new ol.format.WKT();
-        var wktRepresenation = format.writeGeometry(ol3Geom); 
-        
+        var wktRepresenation = format.writeGeometry(ol3Geom);        
         
         //emit to make a new feature for other clients
         socket.emit('update feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: guid }));
@@ -152,6 +154,12 @@ function bufferfeature() {
         alert("No feature selected");
     }
      
+}
+
+function clients() {
+    var clients = io.of('/chat').clients();
+    var clients = io.of('/chat').clients('room'); // all users from room `room`
+    document.getElementById("clients").innerHTML = clients;
 }
 
 
@@ -170,6 +178,43 @@ function setProperties(property) {
     document.getElementById("properties").innerHTML = "Guid: " + property;
 }
 
+//lead client
+function deletefeature() {
+    if (SelectedFeature != null) {
+        var id = SelectedFeature.get("guid");
+        var features = returnFeatureList();
+        for (var i = 0, l = features.length; i < l; i++) {
+            var feature = features[i];
+            var guid = feature.get("guid")
+            if (guid == id) {
+                vector.getSource().removeFeature(feature);
+                socket.emit('delete feature', ({ ID: projectID, Guid: id }));
+            }
+            break;
+        }
+    }
+}
+
+function returnFeatureList() {
+    return source.getFeatures();
+}
+
+
+//other clients
+function removeFeature(msg) {
+
+    var features = returnFeatureList();
+    for (var i = 0, l = features.length; i < l; i++) {
+        var feature = features[i];
+        var guid = feature.get("guid")
+        if (guid == msg.Guid) {
+            vector.getSource().removeFeature(feature);
+            
+        }
+        break;
+    }
+}
+
 //redraw shape using the geometry provided
 function redrawShape(geom, Guid) {
     wkt = new ol.format.WKT;
@@ -185,7 +230,7 @@ function modifyShape(geom, Guid) {
         var guid = feature.get("guid")
         if (guid == Guid) {
             source.removeFeature(feature);
-           
+            
         }
         break;
         

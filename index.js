@@ -64,6 +64,15 @@ function updateFeature(guid, newGeometry, callback) {
     });
 }
 
+function deleteFeature(guid, callback) {
+    client.query("DELETE FROM features WHERE guid = '" + guid + "';", function (err, result) {
+        if (err)
+            callback(err, null);
+        else
+            callback(null, result);
+    });
+}
+
 function extractValue(output) {
     var value = JSON.stringify(output);
     value = value.match(/\d+/)[0];
@@ -163,20 +172,33 @@ io.on('connection', function (socket) {
         io.sockets.in(msg.ID).emit('update feature', ({ Geometry: msg.Geometry, Guid: msg.Guid }));
     });
 
-   
+    socket.on('delete feature', function (msg) {
 
-    socket.on('update feature geometry', function (msg) {
-        updateGeometry(msg.ID, msg.Guid, msg.NewGeometry, function (err, data) {
+        deleteFeature(msg.Guid, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
             }
-            else {
-                console.log('Record Updated ' + data.affectedRows + ' rows');
-                // io.emit('delete feature', msg);
-            }
         });
+
+        io.sockets.in(msg.ID).emit('delete feature', ({ Guid: msg.Guid }));
     });
+
+
+   
+
+    //socket.on('update feature geometry', function (msg) {
+    //    updateGeometry(msg.ID, msg.Guid, msg.NewGeometry, function (err, data) {
+    //        if (err) {
+    //            // error handling code goes here
+    //            console.log("ERROR : ", err);
+    //        }
+    //        else {
+    //            console.log('Record Updated ' + data.affectedRows + ' rows');
+    //            // io.emit('delete feature', msg);
+    //        }
+    //    });
+    //});
 });
 
     http.listen(3000, function () {
