@@ -42,9 +42,8 @@
                       <div class="panel panel-default">
                           <div class="panel-body">
                               <br />
-                              <br />
-                             
-                              <div class="dropdown">
+                                              
+                              <div class="dropdown col-xs-12">
                               <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                   Draw Feature
                                   <span class="caret"></span>
@@ -57,12 +56,32 @@
                               </div>
                               <br />
                               <br />
-                              <button type="button"class="btn btn-danger" onclick="bufferfeature();">Buffer</button>
-                              <br />
-                              <br />
-                              <button type="button" class="btn btn-danger" onclick="deletefeature();">Delete</button>
+                              
+                                  <div class="col-xs-6 text-left">
+                                      <br/>
+                                      <button type="button" class="btn btn-danger" onclick="bufferfeature();">Buffer</button>
+                                     
+                                  </div> 
+                                  <div class="col-xs-6 text-left">
+                                     <br />
+                                      <button type="button" class="btn btn-danger" onclick="deletefeature();">Delete</button>
                           </div>
+                              <div class="col-xs-4 text-left">
+                                  <br />
+                                  <button type="button" class="btn btn-secondary" onclick="bufferfeature();">Copy</button>
+
+                              </div>
+                              <div class="col-xs-4 text-left">
+                                  <br />
+                                  <button type="button" class="btn btn-secondary" onclick="bufferfeature();">Cut</button>
+
+                              </div>
+                              <div class="col-xs-4 text-left">
+                                  <br />
+                                  <button type="button" class="btn btn-secondary" onclick="deletefeature();">Paste</button>
+                              </div>
                       </div>
+                          </div>
                       <div class="alert alert-info" id="area"></div>
                       <br />
                       <div class="alert alert-info" id="properties"></div>

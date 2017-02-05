@@ -104,7 +104,7 @@ function newProject() {
 function openProject() {
 
     //enter name of the project the user would like to open
-    project = prompt("Enter the room name you would like to join");
+    project = prompt("Enter the project name you would like to open");
     //emit project to open
     socket.emit('JoinRoom', { Name: project, CurrentProject: projectID});
     //display project name
@@ -142,9 +142,7 @@ function bufferfeature() {
 
         SelectedFeature.setGeometry(parser.write(buffered));
 
-        var ol3Geom = SelectedFeature.getGeometry();
-        var format = new ol.format.WKT();
-        var wktRepresenation = format.writeGeometry(ol3Geom);        
+        var wktRepresenation = WKTRepresentation(SelectedFeature);       
         
         //emit to make a new feature for other clients
         socket.emit('update feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: guid }));
@@ -209,7 +207,6 @@ function removeFeature(msg) {
         var guid = feature.get("guid")
         if (guid == msg.Guid) {
             vector.getSource().removeFeature(feature);
-            
         }
         break;
     }
@@ -230,10 +227,8 @@ function modifyShape(geom, Guid) {
         var guid = feature.get("guid")
         if (guid == Guid) {
             source.removeFeature(feature);
-            
         }
         break;
-        
     }
     redrawShape(geom, Guid);
 }
@@ -248,6 +243,14 @@ function s4() {
         .toString(16)
         .substring(1);
 }
+
+function WKTRepresentation(feature) {
+    var ol3Geom = feature.getGeometry();
+    var format = new ol.format.WKT();
+    var wktRepresenation = format.writeGeometry(ol3Geom);
+    return wktRepresenation;  
+}
+
 
 
     // global so we can remove it later
@@ -275,9 +278,7 @@ function s4() {
                 var type = feature.getGeometry().getType();
                 //remove the draw interaction
                 map.removeInteraction(draw);
-                var ol3Geom = feature.getGeometry();
-                var format = new ol.format.WKT();
-                var wktRepresenation = format.writeGeometry(ol3Geom);  
+                var wktRepresenation = WKTRepresentation(feature);
                 //emit the feature and project ID to other clients
                 socket.emit('new feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type }));
             });

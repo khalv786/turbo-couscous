@@ -183,22 +183,6 @@ io.on('connection', function (socket) {
 
         io.sockets.in(msg.ID).emit('delete feature', ({ Guid: msg.Guid }));
     });
-
-
-   
-
-    //socket.on('update feature geometry', function (msg) {
-    //    updateGeometry(msg.ID, msg.Guid, msg.NewGeometry, function (err, data) {
-    //        if (err) {
-    //            // error handling code goes here
-    //            console.log("ERROR : ", err);
-    //        }
-    //        else {
-    //            console.log('Record Updated ' + data.affectedRows + ' rows');
-    //            // io.emit('delete feature', msg);
-    //        }
-    //    });
-    //});
 });
 
     http.listen(3000, function () {
