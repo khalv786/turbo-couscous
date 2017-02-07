@@ -119,7 +119,11 @@ function fillProjectLabel(){
 
 function fillID(id) {
     projectID = id;
-};
+}
+
+function notImplemented() {
+    alert("Not Implemented");
+}
 
 function bufferfeature() {
     //if a feature is selected

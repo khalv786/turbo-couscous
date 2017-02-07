@@ -28,65 +28,79 @@
                               <li><a onclick="newProject();" href="#">New Project</a></li>
                               <li><a onclick="openProject();" href="#">Open Project</a></li>
                           </ul>
-                                                         
+
                       </li>
-                      
-                      
+                      <li><a href="#">Help</a></li>
+
                   </ul>
                   <a class="navbar-text" id="projectName" href="#"></a>
               </div>
-
-
               <div class="col-xs-12">
-                  <div class="col-xs-3" style="float:left;">
-                      <div class="panel panel-default">
-                          <div class="panel-body">
-                              <br />
-                                              
-                              <div class="dropdown col-xs-12">
-                              <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                  Draw Feature
-                                  <span class="caret"></span>
-                              </button>
-                              <ul class="dropdown-menu" id="dropdownshapes" aria-labelledby="dropdownMenu1">
-                                  <li><a  onclick="drawShape('Point');" href="#">Point</a></li>
-                                  <li><a onclick="drawShape('Polygon');" href="#">Polygon</a></li>
-                                  <li><a onclick="drawShape('LineString');" href="#">LineString</a></li>
-                              </ul>
+                  <div class="panel panel-default col-xs-3" style="float:left;">
+                      <div class="panel-body">
+
+                          <div class="panel panel-default">
+                              <div class="panel-heading">
+                                  <h3 class="panel-title">Draw</h3>
                               </div>
-                              <br />
-                              <br />
-                              
-                                  <div class="col-xs-6 text-left">
-                                      <br/>
+                              <div class="panel-body">
+                                  <div class="btn-group">
+                                      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                          Draw Feature
+                                          <span class="caret"></span>
+                                      </button>
+                                      <ul class="dropdown-menu" id="dropdownshapes" aria-labelledby="dropdownMenu1">
+                                          <li><a onclick="drawShape('Point');" href="#">Point</a></li>
+                                          <li><a onclick="drawShape('Polygon');" href="#">Polygon</a></li>
+                                          <li><a onclick="drawShape('LineString');" href="#">LineString</a></li>
+                                      </ul>
+                                  </div>
+                              </div>
+                          </div>
+
+                          <div class="panel panel-default">
+                              <div class="panel-heading">
+                                  <h3 class="panel-title">Edit</h3>
+                              </div>
+                              <div class="panel-body">
+
+                                  <div class="col-xs-4 text-left">
+
                                       <button type="button" class="btn btn-danger" onclick="bufferfeature();">Buffer</button>
-                                     
-                                  </div> 
-                                  <div class="col-xs-6 text-left">
-                                     <br />
+                                  </div>
+                                  <div class="col-xs-4 text-left text-center">
+
+                                      <button type="button" class="btn btn-danger" onclick="notImplemented();">Combine</button>
+                                  </div>
+                                  <div class="col-xs-4 text-left">
+
                                       <button type="button" class="btn btn-danger" onclick="deletefeature();">Delete</button>
+                                  </div>
+
+
+                                  <div class="col-xs-4 text-left">
+                                      <br />
+                                      <button type="button" class="btn btn-secondary" onclick="notImplemented();">Copy</button>
+
+                                  </div>
+                                  <div class="col-xs-4 text-left">
+                                      <br />
+                                      <button type="button" class="btn btn-secondary" onclick="notImplemented();">Cut</button>
+
+                                  </div>
+                                  <div class="col-xs-4 text-left">
+                                      <br />
+                                      <button type="button" class="btn btn-secondary" onclick="notImplemented();">Paste</button>
+                                  </div>
+                              </div>
                           </div>
-                              <div class="col-xs-4 text-left">
-                                  <br />
-                                  <button type="button" class="btn btn-secondary" onclick="bufferfeature();">Copy</button>
-
-                              </div>
-                              <div class="col-xs-4 text-left">
-                                  <br />
-                                  <button type="button" class="btn btn-secondary" onclick="bufferfeature();">Cut</button>
-
-                              </div>
-                              <div class="col-xs-4 text-left">
-                                  <br />
-                                  <button type="button" class="btn btn-secondary" onclick="deletefeature();">Paste</button>
-                              </div>
                       </div>
-                          </div>
-                      <div class="alert alert-info" id="area"></div>
+
+                      
                       <br />
-                      <div class="alert alert-info" id="properties"></div>
+                      
                       <br />
-                      <div class="alert alert-info" id="clients"></div>
+                      <!--<div class="alert alert-info" id="clients"></div>-->
                       <div class="panel panel-default" style="display: none;">
                           <div class="panel-body">
                               <label>Chat</label>
@@ -97,16 +111,19 @@
                           </div>
                       </div>
                   </div>
-
-
                   <div id=map class="col-xs-9" style="float:right;"></div>
-                  
+                
                   <div id="popup" class="ol-popup">
                       <a href="#" id="popup-closer" class="ol-popup-closer"></a>
                       <div id="popup-content"></div>
                   </div>
               </div>
-
+              <div class="alert alert-success col-xs-12">
+                  
+                  <div class="alert alert-info col-xs-3" id="area" style="float:right"></div>
+                 
+                  <div class=" alert alert-info col-xs-3" id="properties" style="float:left"></div>
+              </div>
           </form>
       </div>
 
