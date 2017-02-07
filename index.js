@@ -51,8 +51,8 @@ function returnMapIDandAttribute(room, callback) {
 }
 
 //insert feature into database
-function insertFeature(mapid, geometry, guid, type) {
-    var query = client.query("INSERT INTO features (geometry, mapid, guid, type) VALUES ('" + geometry + "', '" + mapid + "', '" + guid + "', '" + type + "')");
+function insertFeature(mapid, geometry, guid, type, value) {
+    var query = client.query("INSERT INTO features (geometry, mapid, guid, type, value) VALUES ('" + geometry + "', '" + mapid + "', '" + guid + "', '" + type + "', '" + value + "')");
 }
 
 //update geometry of feature in database
@@ -157,9 +157,9 @@ io.on('connection', function (socket) {
 
     socket.on('new feature', function (msg) {
 
-        insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Type)
+        insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Type, msg.Value)
 
-        io.sockets.in(msg.ID).emit('new feature', ({ Geometry: msg.Geometry, Guid: msg.Guid }));
+        io.sockets.in(msg.ID).emit('new feature', ({ Geometry: msg.Geometry, Guid: msg.Guid, Value: msg.Value}));
     });
 
     socket.on('update feature', function (msg) {

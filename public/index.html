@@ -134,7 +134,7 @@
             });
 
             socket.on('new feature', function (msg) {
-                redrawShape(msg.Geometry, msg.Guid);
+                redrawShape(msg.Geometry, msg.Guid, msg.Value);
             });
 
             socket.on('update feature', function (msg) {
@@ -161,7 +161,7 @@
                 for(i = 0; i < msg.length; i++){ 
                     var value = msg[i];
                     var format = new ol.format.WKT();
-                            redrawShape(value.geometry, value.guid);             
+                    redrawShape(value.geometry, value.guid, value.value);             
                 }
                      
                     

@@ -182,9 +182,9 @@ function setArea(area) {
 
 function setProperties(feature) {
     var guid = feature.get("guid");
-    var attributes = feature.getProperties();
+    var attributeValue = feature.get(attribute);
 
-    document.getElementById("properties").innerHTML = attributes.guid;
+    document.getElementById("properties").innerHTML = "ID: " + guid + "\n" + attribute + ": " + attributeValue;
 }
 
 //lead client
@@ -224,10 +224,11 @@ function removeFeature(msg) {
 }
 
 //redraw shape using the geometry provided
-function redrawShape(geom, Guid) {
+function redrawShape(geom, Guid, Value) {
     wkt = new ol.format.WKT;
     var feature = wkt.readFeature(geom);
     feature.set("guid", Guid);
+    feature.set(attribute, Value);
     source.addFeature(feature);
 }
 
@@ -237,11 +238,12 @@ function modifyShape(geom, Guid) {
         var feature = features[i];
         var guid = feature.get("guid")
         if (guid == Guid) {
+            var value = feature.get(attribute);
             source.removeFeature(feature);
         }
         break;
     }
-    redrawShape(geom, Guid);
+    redrawShape(geom, Guid, value);
 }
 
 function guid() {
@@ -269,7 +271,7 @@ function addAttribute() {
         var addAttribute = confirm("Would you like to add attributes to the feature");
         if (addAttribute == true) {
             var AttributeName = prompt("What is the name of the attribute");
-            //var AttributeValue = prompt("Enter the value of the attribute");
+            
             attributes = AttributeName;
             break;
            
@@ -277,6 +279,11 @@ function addAttribute() {
     }
     return attributes;
 }
+
+function addValue() {
+    return prompt("Enter the value of the " + attribute);
+}
+
 
 
 
@@ -295,17 +302,16 @@ function addAttribute() {
             map.addInteraction(draw);
             //after drawing the feature
             draw.on('drawend', function (event) {
-               // var values = addAttribute();
-              //  var attributeName = values[0];
-              //  var attributeValue = values[1];
+
+                var attributeValue = addValue();
                 var id = guid();
 
                 // retrieve the feature
                 var feature = event.feature
                 feature.set("guid", id);
-            //    if (attributeName != null) {
-            //        feature.set(attributeName, attributeValue);
-            //    }
+                if (attributeValue != "") {
+                    feature.set(attribute, attributeValue);
+                }
                 
                 var newFeature = feature;
                 var type = feature.getGeometry().getType();
@@ -313,7 +319,7 @@ function addAttribute() {
                 map.removeInteraction(draw);
                 var wktRepresenation = WKTRepresentation(feature);
                 //emit the feature and project ID to other clients
-                socket.emit('new feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type }));
+                socket.emit('new feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type, Value: attributeValue }));
             });
         }
     }
