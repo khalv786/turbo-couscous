@@ -7,6 +7,7 @@ var SelectedFeature;
 var project;
 var projectID = "";
 var vector;
+var attribute = ""
 
 // when the page first loads
 window.onload = function init() {
@@ -78,8 +79,8 @@ window.onload = function init() {
             SelectedFeature = feature;
             //display area of feature 
             setArea(feature.getGeometry().getArea());
-            var guid = feature.get("guid");
-            setProperties(guid);
+            //var guid = feature.get("guid");
+            setProperties(feature);
 
         } else {
             //remove area if no feature is selected
@@ -95,8 +96,9 @@ window.onload = function init() {
 function newProject() {
     //prompt for user to enter map name
     project = prompt("Enter Name of Map");
+    var attributes = addAttribute();
     //emit new project
-    socket.emit('new project', { Name: project, CurrentProject: projectID});
+    socket.emit('new project', { Name: project, CurrentProject: projectID, Attributes: attributes});
     //display project name
     fillProjectLabel();
 }
@@ -117,8 +119,10 @@ function fillProjectLabel(){
     projectName.innerText = project;
 }
 
-function fillID(id) {
+function fillID(id, attributeP) {
     projectID = id;
+    attribute = attributeP;
+    console.log(projectID, attribute);
 }
 
 function notImplemented() {
@@ -176,8 +180,11 @@ function setArea(area) {
     document.getElementById("area").innerHTML = "Selected Area: " + areaSqKm + " km<sup>2</sup>";
 }
 
-function setProperties(property) {
-    document.getElementById("properties").innerHTML = "Guid: " + property;
+function setProperties(feature) {
+    var guid = feature.get("guid");
+    var attributes = feature.getProperties();
+
+    document.getElementById("properties").innerHTML = attributes.guid;
 }
 
 //lead client
@@ -255,6 +262,22 @@ function WKTRepresentation(feature) {
     return wktRepresenation;  
 }
 
+function addAttribute() {
+    
+    var attributes = ""
+    while (true) {
+        var addAttribute = confirm("Would you like to add attributes to the feature");
+        if (addAttribute == true) {
+            var AttributeName = prompt("What is the name of the attribute");
+            //var AttributeValue = prompt("Enter the value of the attribute");
+            attributes = AttributeName;
+            break;
+           
+        } else { break;}
+    }
+    return attributes;
+}
+
 
 
     // global so we can remove it later
@@ -272,11 +295,17 @@ function WKTRepresentation(feature) {
             map.addInteraction(draw);
             //after drawing the feature
             draw.on('drawend', function (event) {
+               // var values = addAttribute();
+              //  var attributeName = values[0];
+              //  var attributeValue = values[1];
                 var id = guid();
 
                 // retrieve the feature
                 var feature = event.feature
                 feature.set("guid", id);
+            //    if (attributeName != null) {
+            //        feature.set(attributeName, attributeValue);
+            //    }
                 
                 var newFeature = feature;
                 var type = feature.getGeometry().getType();

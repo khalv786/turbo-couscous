@@ -1,11 +1,12 @@
 //declare global variables
 var express = require('express');
 var fs = require('fs');
-var path = require('path');
+var path = require('path'); 
 var app = express();
 var http = require('http').Server(app);
 var results = [];
 var numUsers = 0;
+ 
 
 var pg = require("pg");
 // address of postgres database
@@ -28,9 +29,9 @@ app.get('/', function (req, res) {
 var io = require('socket.io')(http);
 
 //insert map and return map ID 
-function insertMap(room, callback)
+function insertMap(room,attributes, callback)
 {
-    client.query("INSERT INTO maps (mapname) VALUES ('" + room + "') RETURNING mapid", function (err, result) {
+    client.query("INSERT INTO maps (mapname, attribute) VALUES ('" + room + "', '" + attributes + "') RETURNING mapid", function (err, result) {
         if (err)
             callback(err, null);
         else
@@ -40,8 +41,8 @@ function insertMap(room, callback)
 }
 
 //return map ID
-function returnMapID(room, callback) {
-    client.query("SELECT mapid FROM maps mapname WHERE mapname = ('" + room + "')", function (err, result) {
+function returnMapIDandAttribute(room, callback) {
+    client.query("SELECT mapid, attribute FROM maps mapname WHERE mapname = ('" + room + "')", function (err, result) {
         if (err)
             callback(err, null);
         else
@@ -108,21 +109,22 @@ io.on('connection', function (socket) {
     });
     //when user opens a project
     socket.on('JoinRoom', function (room) {
-        returnMapID(room.Name, function (err, data) {
+        returnMapIDandAttribute(room.Name, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
             } else {            
                 // extract just the value
                 var id = extractValue(data.rows);
-                
+                var attribute = data.rows.map(function (a) { return a.attribute; });
+                attribute = attribute[0];
                 if (room.CurrentProject != "") {
                     socket.leave(room.CurrentProject);
                     console.log("user left room:" + room.CurrentProject);
                 }
                 console.log("user joined :" + id);
                 socket.join(id);
-                io.sockets.in(id).emit('send ID to client', id);
+                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: attribute });
 
                 var features = returnFeatures(id);
             }
@@ -132,7 +134,7 @@ io.on('connection', function (socket) {
     //to create a new project
     socket.on('new project', function (room) {
 
-        insertMap(room.Name, function (err, data) {
+        insertMap(room.Name, room.Attributes, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
