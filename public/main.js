@@ -10,9 +10,6 @@ var vector;
 var attribute = ""
 var selectSingleClick;
 
-$(document).ready(function () {
-    $("chatpage").hide(); 
-});
 
 // when the page first loads
 window.onload = function init() {
@@ -98,6 +95,11 @@ window.onload = function init() {
    
  map.addInteraction(selectSingleClick);
 };
+
+function login() {
+    document.getElementById("chatpage").style.display = "block";
+    document.getElementById("loginpage").style.display = "none";
+}
 
 function newProject() {
     //prompt for user to enter map name

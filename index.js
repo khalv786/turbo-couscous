@@ -1,5 +1,6 @@
 //declare global variables
 var express = require('express');
+var $ = require('jquery');
 var fs = require('fs');
 var path = require('path'); 
 var app = express();

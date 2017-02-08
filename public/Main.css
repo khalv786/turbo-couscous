@@ -1,6 +1,10 @@
 ﻿body {
 }
 
+ ul {
+ list-style: none;
+ }
+
 .ol-popup {
     position: absolute;
     min-width: 180px;
