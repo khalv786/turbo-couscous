@@ -150,7 +150,7 @@ io.on('connection', function (socket) {
                 //open project
                 socket.join(id);
                 //send mapID to client
-                io.sockets.in(id).emit('send ID to client', id);
+                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTES: room.Attributes });
             }
         });
     });

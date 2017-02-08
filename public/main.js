@@ -8,10 +8,15 @@ var project;
 var projectID = "";
 var vector;
 var attribute = ""
+var selectSingleClick;
+
+$(document).ready(function () {
+    $("chatpage").hide(); 
+});
 
 // when the page first loads
 window.onload = function init() {
-
+    
     //create a base vector layer to draw on
     vector = new ol.layer.Vector({
         source: source,
@@ -72,7 +77,7 @@ window.onload = function init() {
  var select = null;  // ref to currently selected interaction
 
  // select interaction on map
- var selectSingleClick = new ol.interaction.Select();
+ selectSingleClick = new ol.interaction.Select();
     selectSingleClick.on('select', function (e) {
         var feature = e.selected[0];
         if (feature != undefined) {
@@ -86,6 +91,7 @@ window.onload = function init() {
             //remove area if no feature is selected
             removeArea()
             FeatureToBuffer = null;
+            removeProperties();
         }
         
  });
@@ -101,6 +107,7 @@ function newProject() {
     socket.emit('new project', { Name: project, CurrentProject: projectID, Attributes: attributes});
     //display project name
     fillProjectLabel();
+    
 }
 
 function openProject() {
@@ -182,9 +189,16 @@ function setArea(area) {
 
 function setProperties(feature) {
     var guid = feature.get("guid");
-    var attributeValue = feature.get(attribute);
+    if (attribute != undefined) {
+        var attributeValue = feature.get(attribute);
+        document.getElementById("properties").innerHTML = "ID: " + guid + "\n" + attribute + ": " + attributeValue;
+    } else {
+        document.getElementById("properties").innerHTML = "ID: " + guid;
+    } 
+}
 
-    document.getElementById("properties").innerHTML = "ID: " + guid + "\n" + attribute + ": " + attributeValue;
+function removeProperties() {
+    document.getElementById("properties").innerHTML = "";
 }
 
 //lead client
@@ -233,6 +247,8 @@ function redrawShape(geom, Guid, Value) {
 }
 
 function modifyShape(geom, Guid) {
+    var features = selectSingleClick.getFeatures();
+    features.clear();
     var features = source.getFeatures();
     for (var i = 0, l = features.length; i < l; i++) {
         var feature = features[i];
@@ -303,13 +319,15 @@ function addValue() {
             //after drawing the feature
             draw.on('drawend', function (event) {
 
-                var attributeValue = addValue();
+                if (attribute != undefined) {
+                    var attributeValue = addValue();
+                }
                 var id = guid();
 
                 // retrieve the feature
                 var feature = event.feature
                 feature.set("guid", id);
-                if (attributeValue != "") {
+                if (attributeValue != undefined) {
                     feature.set(attribute, attributeValue);
                 }
                 
@@ -317,6 +335,7 @@ function addValue() {
                 var type = feature.getGeometry().getType();
                 //remove the draw interaction
                 map.removeInteraction(draw);
+                setProperties(feature);
                 var wktRepresenation = WKTRepresentation(feature);
                 //emit the feature and project ID to other clients
                 socket.emit('new feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type, Value: attributeValue }));
