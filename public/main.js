@@ -9,6 +9,7 @@ var projectID = "";
 var vector;
 var attribute = ""
 var selectSingleClick;
+var initialLoad = true;
 
 
 // when the page first loads
@@ -96,24 +97,51 @@ window.onload = function init() {
  map.addInteraction(selectSingleClick);
 };
 
-function login() {
-    document.getElementById("chatpage").style.display = "block";
-    document.getElementById("loginpage").style.display = "none";
+//$(document).ready(function () {
+
+//    var cookieName = 'firstPageLoad';
+//    var cookieValue = 1;
+//    // if the cookie doesn't exist we're on the first page load...
+//    if (!$.cookie(cookieName)) {
+//        // and set a cookie that is valid for the entire domain
+//        $.cookie(cookieName, cookieValue, { path: '/' });
+//        $('#mappage').hide()
+//        $('#loginpage').show()
+//    } 
+//    // if the cookie does exist, its (most probably) a succeeding page load...
+//    else {
+//        $('#mappage').hide()
+//        $('#loginpage').show()
+//    }
+//});
+
+function submit() {
+    //document.getElementById("mappage").style.left = "100%";
+    //document.getElementById("mappage").style.position = "block";
+    //document.getElementById("loginpage").style.left = "200%";
+    //document.getElementById("loginpage").style.position = "absolute%";
+    //$("#mappage").show();
+    //$("#loginpage").hide();
+    //map.updateSize();
+
+    //map.setSize([100,100]);
+    
+    
 }
 
 function newProject() {
     //prompt for user to enter map name
     project = prompt("Enter Name of Map");
-    var attributes = addAttribute();
+    var attribute = addAttribute();
     //emit new project
-    socket.emit('new project', { Name: project, CurrentProject: projectID, Attributes: attributes});
+    socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute});
     //display project name
     fillProjectLabel();
     
 }
 
 function openProject() {
-
+   
     //enter name of the project the user would like to open
     project = prompt("Enter the project name you would like to open");
     //emit project to open
@@ -169,6 +197,61 @@ function bufferfeature() {
         alert("No feature selected");
     }
      
+}
+
+function styleFeatures() {
+    features = returnFeatureList();
+    var UniqueAttributes = [];
+    
+    var value;
+    var isInside;
+    for (var i = 0, l = features.length; i < l; i++) {
+        var feature = features[i];
+        var guid = feature.get("guid")
+        value = feature.get(attribute);
+        isInside = contains(UniqueAttributes, value)
+        if (isInside == false) {
+            UniqueAttributes.push(value);
+        }
+    }
+    console.log(UniqueAttributes);
+
+    var string = $('html').attr('class');
+    //var array = string.split(' ');
+   // var arrayLength = parseInt(array.length);
+
+    //for (i = 0; i <= UniqueAttributes.length; i++) {
+    //    $("#test table").append('<tr><td>' + UniqueAttributes[i] + '</td></tr>')
+
+    //}
+
+    for (var i = 0; i < UniqueAttributes.length; i++) {
+        var trd = "";
+        trd += "<tr>";
+        trd += "<td><label id=value>"+ UniqueAttributes[i];+ " <label> </td>";
+        trd += "<td>";
+        trd += "<select class='input-small'><option value=''>Blue</option><option value=''>Green</option><option value=''>Red</option></select>";
+        trd += "</td>";
+        
+        trd += "</tr>";
+        $(".table-bordered tbody").append(trd);
+        //document.getElementById("value").innerText = UniqueAttributes[i];
+    }
+
+    var btnOpenModel = document.getElementById("btnOpenModel")
+    btnOpenModel.click();
+
+
+}
+
+
+function contains(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] === obj) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function clients() {

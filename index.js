@@ -135,7 +135,7 @@ io.on('connection', function (socket) {
     //to create a new project
     socket.on('new project', function (room) {
 
-        insertMap(room.Name, room.Attributes, function (err, data) {
+        insertMap(room.Name, room.Attribute, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
@@ -151,7 +151,7 @@ io.on('connection', function (socket) {
                 //open project
                 socket.join(id);
                 //send mapID to client
-                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTES: room.Attributes });
+                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: room.Attribute });
             }
         });
     });

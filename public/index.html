@@ -16,188 +16,223 @@
       
     <title>Land App</title>
   </head>
-  <body>
+<body>
 
-      <div>
-          <form action="">
-              <ul class="pages" style="list-style: none;">
-                  <li id="loginpage">
-                      <div class="container">
-                          <div class="row">
-                              <div class="col-sm-6 col-md-4 col-md-offset-4">
-                                  <h1 class="text-center login-title">Land App</h1>
-                                  <div class="account-wall">
-                                      <div style="text-align:center;">
-                                          <img class="profile-img" src="logo.ico" />
-                                      </div>
-                                      <div class="form-signin">
-                                          <input type="text" class="form-control" placeholder="Username" required autofocus>
-                                          <input type="password" class="form-control" placeholder="Password" required>
-                                          <button class="btn btn-lg btn-primary btn-block" type="submit" onclick="login()">
-                                              Sign in
-                                          </button>
-                                          
-                                      </div>
-                                  </div>
-                                  
-                              </div>
-                          </div>
-                      </div>
-                  </li>
-                  <li id="chatpage" style="display:none">
-                      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                          <ul class="nav navbar-nav">
-                              <a class="navbar-brand" href="#">Land App</a>
-                              <li class="dropdown">
-                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">File<span class="caret"></span></a>
-                                  <ul class="dropdown-menu">
-                                      <li><a onclick="newProject();" href="#">New Project</a></li>
-                                      <li><a onclick="openProject();" href="#">Open Project</a></li>
-                                  </ul>
+    <div>
+        <form action="" name="myform" novalidate>
+            <!--<div id="loginpage">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-6 col-md-4 col-md-offset-4">
+                            <h1 class="text-center login-title">Land App</h1>
+                            <div class="account-wall">
+                                <div style="text-align:center;">
+                                    <img class="profile-img" src="logo.ico" />
+                                </div>
+                                <div class="form-signin">
+                                    <input type="text" class="form-control" placeholder="Username" required autofocus>
+                                    <input type="password" class="form-control" placeholder="Password" required>
+                                    <button id="login"class="btn btn-lg btn-primary btn-block" type="submit" onclick="submit()">
+                                        Log in
+                                    </button>
+                                </div>
+                            </div>
 
-                              </li>
-                              <li><a href="#">Help</a></li>
+                        </div>
+                    </div>
+                </div>
+            </div>-->
+            <div id="mappage">
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <a class="navbar-brand" href="#">Land App</a>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">File<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a onclick="newProject();" href="#">New Project</a></li>
+                                <li><a onclick="openProject();" href="#">Open Project</a></li>
+                            </ul>
 
-                          </ul>
-                          <a class="navbar-text" id="projectName" href="#"></a>
-                      </div>
-                      <div class="col-xs-12">
-                          <div class="panel panel-default col-xs-3" style="float:left;">
-                              <div class="panel-body">
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Edit<span class="caret"></span></a>
 
-                                  <div class="panel panel-default">
-                                      <div class="panel-heading">
-                                          <h3 class="panel-title">Draw</h3>
-                                      </div>
-                                      <div class="panel-body">
-                                          <div class="btn-group">
-                                              <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                                  Draw Feature
-                                                  <span class="caret"></span>
-                                              </button>
-                                              <ul class="dropdown-menu" id="dropdownshapes" aria-labelledby="dropdownMenu1">
-                                                  <li><a onclick="drawShape('Point');" href="#">Point</a></li>
-                                                  <li><a onclick="drawShape('Polygon');" href="#">Polygon</a></li>
-                                                  <li><a onclick="drawShape('LineString');" href="#">LineString</a></li>
-                                              </ul>
-                                          </div>
-                                      </div>
-                                  </div>
+                            <ul class="dropdown-menu">
+                                <li><a onclick="styleFeatures();" href="#">Style Features</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <a class="navbar-text" id="projectName" href="#"></a>
+                </div>
+                <div class="col-xs-12">
+                    <div class="panel panel-default col-xs-3" style="float:left;">
+                        <div class="panel-body">
 
-                                  <div class="panel panel-default">
-                                      <div class="panel-heading">
-                                          <h3 class="panel-title">Edit</h3>
-                                      </div>
-                                      <div class="panel-body">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Draw</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="btn-group">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                            Draw Feature
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" id="dropdownshapes" aria-labelledby="dropdownMenu1">
+                                            <li><a onclick="drawShape('Point');" href="#">Point</a></li>
+                                            <li><a onclick="drawShape('Polygon');" href="#">Polygon</a></li>
+                                            <li><a onclick="drawShape('LineString');" href="#">LineString</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
 
-                                          <div class="col-xs-4 text-left">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Edit</h3>
+                                </div>
+                                <div class="panel-body">
 
-                                              <button type="button" class="btn btn-danger" onclick="bufferfeature();">Buffer</button>
-                                          </div>
-                                          <div class="col-xs-4 text-left text-center">
+                                    <div class="col-xs-4 text-left">
 
-                                              <button type="button" class="btn btn-danger" onclick="notImplemented();">Combine</button>
-                                          </div>
-                                          <div class="col-xs-4 text-left">
+                                        <button type="button" class="btn btn-danger" onclick="bufferfeature();">Buffer</button>
+                                    </div>
+                                    <div class="col-xs-4 text-left text-center">
 
-                                              <button type="button" class="btn btn-danger" onclick="deletefeature();">Delete</button>
-                                          </div>
+                                        <button type="button" class="btn btn-danger" onclick="notImplemented();">Combine</button>
+                                    </div>
+                                    <div class="col-xs-4 text-left">
 
-
-                                          <div class="col-xs-4 text-left">
-                                              <br />
-                                              <button type="button" class="btn btn-secondary" onclick="notImplemented();">Copy</button>
-
-                                          </div>
-                                          <div class="col-xs-4 text-left">
-                                              <br />
-                                              <button type="button" class="btn btn-secondary" onclick="notImplemented();">Cut</button>
-
-                                          </div>
-                                          <div class="col-xs-4 text-left">
-                                              <br />
-                                              <button type="button" class="btn btn-secondary" onclick="notImplemented();">Paste</button>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                              <!--<div class="alert alert-info" id="clients"></div>-->
-                              <div class="panel panel-default" style="display: none;">
-                                  <div class="panel-body">
-                                      <label>Chat</label>
-                                      <ul id="messages"></ul>
-                                      <input type="text" placeholder="Type here..." class="form-control" id="m" autocomplete="off" />
-                                      <br />
-                                      <button id="btnSend" class="btn btn-default">Send</button>
-                                  </div>
-                              </div>
-                          </div>
-                          <div id=map class="col-xs-9" style="float:right;"></div>
-
-                          <div id="popup" class="ol-popup">
-                              <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-                              <div id="popup-content"></div>
-                          </div>
-                      </div>
-                      <div class="alert alert-success col-xs-12">
-
-                          <div class="alert alert-info col-xs-3" id="area" style="float:right"></div>
-
-                          <div class=" alert alert-info col-xs-3" id="properties" style="float:left"></div>
-                      </div>
-                  </li>
-              </ul>
-              
-          </form>
-      </div>
+                                        <button type="button" class="btn btn-danger" onclick="deletefeature();">Delete</button>
+                                    </div>
 
 
-        <script>
-            var socket = io();
-            
-            $('form').submit(function () {
-                socket.emit('chat message', $('#m').val());
-                $('#m').val('');
-                
-                return false;
-            });
+                                    <div class="col-xs-4 text-left">
+                                        <br />
+                                        <button type="button" class="btn btn-secondary" onclick="notImplemented();">Copy</button>
 
-            socket.on('new feature', function (msg) {
-                redrawShape(msg.Geometry, msg.Guid, msg.Value);
-            });
+                                    </div>
+                                    <div class="col-xs-4 text-left">
+                                        <br />
+                                        <button type="button" class="btn btn-secondary" onclick="notImplemented();">Cut</button>
 
-            socket.on('update feature', function (msg) {
-                
-                modifyShape(msg.Geometry, msg.Guid);
-            });
+                                    </div>
+                                    <div class="col-xs-4 text-left">
+                                        <br />
+                                        <button type="button" class="btn btn-secondary" onclick="notImplemented();">Paste</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--<div class="alert alert-info" id="clients"></div>-->
+                        <div class="panel panel-default" style="display: none;">
+                            <div class="panel-body">
+                                <label>Chat</label>
+                                <ul id="messages"></ul>
+                                <input type="text" placeholder="Type here..." class="form-control" id="m" autocomplete="off" />
+                                <br />
+                                <button id="btnSend" class="btn btn-default">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id=map class="col-xs-9" style="float:right;"></div>
 
-            socket.on('send ID to client', function (data) {
-                fillID(data.ID, data.ATTRIBUTE);
-            });
+                    <div id="popup" class="ol-popup">
+                        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                        <div id="popup-content"></div>
+                    </div>
+                </div>
+                <div class="alert alert-success col-xs-12">
 
-            socket.on('chat message', function (msg) {
-                $('#messages').append($('<li>').text(msg));
-            });
+                    <div class="alert alert-info col-xs-3" id="area" style="float:right"></div>
 
-            socket.on('delete feature', function (msg) {
-                removeFeature(msg);
-            });
+                    <div class=" alert alert-info col-xs-3" id="properties" style="float:left"></div>
+                </div>
+            </div>
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
 
-            socket.on('features', function (msg) {
-                console.log(msg);
-                var geom;
-                var i;
-                for(i = 0; i < msg.length; i++){ 
-                    var value = msg[i];
-                    var format = new ol.format.WKT();
-                    redrawShape(value.geometry, value.guid, value.value);             
-                }
-                     
-                    
-});
-        
-</script>
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">Style Features</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="test">
+                                <table class="table table-bordered">
+                                    <thead class="mbhead">
+                                        <tr class="mbrow">
+                                            <th>Value</th>
+                                            <th>Colour</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
 
-      <script type="text/javascript" src="main.js"></script>
-  </body>
+                </div>
+            </div>
+            <button id="btnOpenModel" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" style="display:none">Open Modal</button>
+    </div>
+    </form>
+    </div>
+
+
+    <script>
+        var socket = io();
+
+        $('form').submit(function () {
+            socket.emit('chat message', $('#m').val());
+            $('#m').val('');
+
+            return false;
+        });
+
+        socket.on('new feature', function (msg) {
+            redrawShape(msg.Geometry, msg.Guid, msg.Value);
+        });
+
+        socket.on('update feature', function (msg) {
+
+            modifyShape(msg.Geometry, msg.Guid);
+        });
+
+        socket.on('send ID to client', function (data) {
+            fillID(data.ID, data.ATTRIBUTE);
+        });
+
+        socket.on('chat message', function (msg) {
+            $('#messages').append($('<li>').text(msg));
+        });
+
+        socket.on('delete feature', function (msg) {
+            removeFeature(msg);
+        });
+
+        socket.on('features', function (msg) {
+            console.log(msg);
+            var geom;
+            var i;
+            for (i = 0; i < msg.length; i++) {
+                var value = msg[i];
+                var format = new ol.format.WKT();
+                redrawShape(value.geometry, value.guid, value.value);
+            }
+
+
+        });
+
+    </script>
+
+    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="jquery.cookie.js"></script>
+</body>
+
 </html>
