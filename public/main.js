@@ -11,7 +11,8 @@ var attribute = ""
 var selectSingleClick;
 var initialLoad = true;
 var UniqueAttributes = [];
-
+var originalFeatureStyle;
+var fill 
 
 // when the page first loads
 window.onload = function init() {
@@ -78,19 +79,26 @@ window.onload = function init() {
  // select interaction on map
  selectSingleClick = new ol.interaction.Select();
     selectSingleClick.on('select', function (e) {
-        var feature = e.selected[0];
-        if (feature != undefined) {
-            SelectedFeature = feature;
+        SelectedFeature = e.selected[0];
+        if (SelectedFeature instanceof ol.Feature) {
+            var style = SelectedFeature.getStyle();
+            fill = style.fill_.color_;
+            SelectedFeature.setStyle(styleFeature(fill, 2));
+            
             //display area of feature 
-            setArea(feature.getGeometry().getArea());
-            //var guid = feature.get("guid");
-            setProperties(feature);
+            setArea(SelectedFeature.getGeometry().getArea());
+           
+            setProperties(SelectedFeature);
 
         } else {
+            SelectedFeature = e.deselected[0];
             //remove area if no feature is selected
-            removeArea()
-            FeatureToBuffer = null;
+            removeArea();
+            //FeatureToBuffer = null;
             removeProperties();
+            SelectedFeature.setStyle(styleFeature(fill, 1.25));
+            SelectedFeature = undefined;
+
         }
         
  });
@@ -98,37 +106,7 @@ window.onload = function init() {
  map.addInteraction(selectSingleClick);
 };
 
-//$(document).ready(function () {
 
-//    var cookieName = 'firstPageLoad';
-//    var cookieValue = 1;
-//    // if the cookie doesn't exist we're on the first page load...
-//    if (!$.cookie(cookieName)) {
-//        // and set a cookie that is valid for the entire domain
-//        $.cookie(cookieName, cookieValue, { path: '/' });
-//        $('#mappage').hide()
-//        $('#loginpage').show()
-//    } 
-//    // if the cookie does exist, its (most probably) a succeeding page load...
-//    else {
-//        $('#mappage').hide()
-//        $('#loginpage').show()
-//    }
-//});
-
-function submit() {
-    //document.getElementById("mappage").style.left = "100%";
-    //document.getElementById("mappage").style.position = "block";
-    //document.getElementById("loginpage").style.left = "200%";
-    //document.getElementById("loginpage").style.position = "absolute%";
-    //$("#mappage").show();
-    //$("#loginpage").hide();
-    //map.updateSize();
-
-    //map.setSize([100,100]);
-    
-    
-}
 
 function newProject() {
     //prompt for user to enter map name
@@ -140,6 +118,18 @@ function newProject() {
     fillProjectLabel();
     
 }
+
+function styleFeature(colour, width) {
+    var featureStyle = new ol.style.Style({
+        fill: new ol.style.Fill({ color: colour }),
+        stroke: new ol.style.Stroke({
+            width: width,
+            color: '#3399CC'
+        })
+    });
+    return featureStyle;
+}
+
 
 function openProject() {
    
@@ -262,10 +252,14 @@ function applyStyle() {
                 style = new ol.style.Style({
                     //I don't know how to get the color of your kml to fill each room
                     fill: new ol.style.Fill({ color: colour }),
-                    stroke: new ol.style.Stroke({ color: '#3399CC' }),
+                    stroke: new ol.style.Stroke({
+                        color: '#3399CC',
+                        width: 1.25
+                    }),
                     
                 });
                 feature.setStyle(style);
+
             }
     }
 }
