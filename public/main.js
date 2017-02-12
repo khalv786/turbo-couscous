@@ -113,6 +113,7 @@ window.onload = function init() {
 function newProject() {
     //prompt for user to enter map name
     project = prompt("Enter Name of Map");
+    clearFeatures();
     var attribute = addAttribute();
     //emit new project
     socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute});
@@ -122,7 +123,7 @@ function newProject() {
 
 
 function returnFillColour(Feature) {
-    var style = SelectedFeature.getStyle();
+    var style = Feature.getStyle();
     fill = style.fill_.color_;
     return fill;
 }
@@ -170,10 +171,15 @@ function openProject() {
    
     //enter name of the project the user would like to open
     project = prompt("Enter the project name you would like to open");
+    clearFeatures();
     //emit project to open
     socket.emit('JoinRoom', { Name: project, CurrentProject: projectID});
     //display project name
     fillProjectLabel();
+}
+
+function clearFeatures() {
+    source.clear();
 }
 
 //display project name
