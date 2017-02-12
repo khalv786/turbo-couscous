@@ -17,31 +17,9 @@
     <title>Land App</title>
   </head>
 <body>
-
     <div>
         <form action="" name="myform" novalidate>
-            <!--<div id="loginpage">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-sm-6 col-md-4 col-md-offset-4">
-                            <h1 class="text-center login-title">Land App</h1>
-                            <div class="account-wall">
-                                <div style="text-align:center;">
-                                    <img class="profile-img" src="logo.ico" />
-                                </div>
-                                <div class="form-signin">
-                                    <input type="text" class="form-control" placeholder="Username" required autofocus>
-                                    <input type="password" class="form-control" placeholder="Password" required>
-                                    <button id="login"class="btn btn-lg btn-primary btn-block" type="submit" onclick="submit()">
-                                        Log in
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>-->
+           <div> 
             <div id="mappage">
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
@@ -187,52 +165,7 @@
 
 
     <script>
-        var socket = io();
-
-        $('form').submit(function () {
-            socket.emit('chat message', $('#m').val());
-            $('#m').val('');
-
-            return false;
-        });
-
-        socket.on('new feature', function (msg) {
-            redrawShape(msg.Geometry, msg.Guid, msg.Value);
-        });
-
-        socket.on('update feature', function (msg) {
-
-            modifyShape(msg.Geometry, msg.Guid);
-        });
-
-        socket.on('send ID to client', function (data) {
-            fillID(data.ID, data.ATTRIBUTE);
-        });
-
-        socket.on('chat message', function (msg) {
-            $('#messages').append($('<li>').text(msg));
-        });
-
-        socket.on('delete feature', function (msg) {
-            removeFeature(msg);
-        });
-
-        socket.on('features', function (msg) {
-            console.log(msg);
-            var geom;
-            var i;
-            for (i = 0; i < msg.length; i++) {
-                var value = msg[i];
-                var format = new ol.format.WKT();
-                redrawShape(value.geometry, value.guid, value.value, value.colour);
-            }
-
-
-        });
-
-        socket.on('style feature', function (msg) {
-            clientStyleFeature(msg.Guid, msg.Colour);
-        });
+        
 
     </script>
 

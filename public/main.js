@@ -512,4 +512,50 @@ function addValue() {
         }
     }
 
+    var socket = io();
+
+    $('form').submit(function () {
+        socket.emit('chat message', $('#m').val());
+        $('#m').val('');
+
+        return false;
+    });
+
+    socket.on('new feature', function (msg) {
+        redrawShape(msg.Geometry, msg.Guid, msg.Value);
+    });
+
+    socket.on('update feature', function (msg) {
+
+        modifyShape(msg.Geometry, msg.Guid);
+    });
+
+    socket.on('send ID to client', function (data) {
+        fillID(data.ID, data.ATTRIBUTE);
+    });
+
+    socket.on('chat message', function (msg) {
+        $('#messages').append($('<li>').text(msg));
+    });
+
+    socket.on('delete feature', function (msg) {
+        removeFeature(msg);
+    });
+
+    socket.on('features', function (msg) {
+        console.log(msg);
+        var geom;
+        var i;
+        for (i = 0; i < msg.length; i++) {
+            var value = msg[i];
+            var format = new ol.format.WKT();
+            redrawShape(value.geometry, value.guid, value.value, value.colour);
+        }
+
+
+    });
+
+    socket.on('style feature', function (msg) {
+        clientStyleFeature(msg.Guid, msg.Colour);
+    });
     
