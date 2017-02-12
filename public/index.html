@@ -230,6 +230,10 @@
 
         });
 
+        socket.on('style feature', function (msg) {
+            clientStyleFeature(msg.Guid, msg.Colour);
+        });
+
     </script>
 
     <script type="text/javascript" src="main.js"></script>

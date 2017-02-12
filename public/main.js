@@ -99,8 +99,6 @@ window.onload = function init() {
             removeProperties();
             SelectedFeature = styleFeature(SelectedFeature,1.25);
             SelectedFeature = undefined;
-            //selectSingleClick.getFeatures().clear();
-
         }
         
  });
@@ -132,6 +130,28 @@ function styleFeature(SelectedFeature, width) {
     });
     SelectedFeature.setStyle(featureStyle);
     return SelectedFeature;
+}
+
+function clientStyleFeature(guid, colour) {
+    var features = returnFeatureList();
+
+    for (var i = 0, l = features.length; i < l; i++) {
+        var feature = features[i];
+        var Guid = feature.get('guid');
+        if (Guid == guid) {
+           
+            style = new ol.style.Style({
+                //I don't know how to get the color of your kml to fill each room
+                fill: new ol.style.Fill({ color: colour }),
+                stroke: new ol.style.Stroke({
+                    color: '#3399CC',
+                    width: 1.25
+                }),
+
+            });
+             feature.setStyle(style);
+        }
+    }       
 }
 
 
@@ -211,14 +231,8 @@ function styleFeatures() {
     }
     console.log(UniqueAttributes);
 
-    var string = $('html').attr('class');
-    //var array = string.split(' ');
-   // var arrayLength = parseInt(array.length);
+    //var string = $('html').attr('class');
 
-    //for (i = 0; i <= UniqueAttributes.length; i++) {
-    //    $("#test table").append('<tr><td>' + UniqueAttributes[i] + '</td></tr>')
-
-    //}
 
     for (var i = 0; i < UniqueAttributes.length; i++) {
         var trd = "";
@@ -230,7 +244,6 @@ function styleFeatures() {
         
         trd += "</tr>";
         $(".table-bordered tbody").append(trd);
-        //document.getElementById("value").innerText = UniqueAttributes[i];
     }
 
     var btnOpenModel = document.getElementById("btnOpenModel")
@@ -244,6 +257,7 @@ function applyStyle() {
     for (var i = 0, l = features.length; i < l; i++) {
         var feature = features[i];
         var value = feature.get(attribute);
+        var guid = feature.get('guid');
         for (var j = 0; j <= UniqueAttributes.length; j++)
 
             if (value == UniqueAttributes[j]) {
@@ -263,7 +277,7 @@ function applyStyle() {
                     
                 });
                 feature.setStyle(style);
-
+                socket.emit('style feature', ({ ID: projectID, Guid: guid, Colour: colour }));
             }
     }
 }

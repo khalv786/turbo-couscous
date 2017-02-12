@@ -186,6 +186,19 @@ io.on('connection', function (socket) {
 
         io.sockets.in(msg.ID).emit('delete feature', ({ Guid: msg.Guid }));
     });
+
+    socket.on('style feature', function (msg) {
+
+        //styleFeature(msg.Guid, function (err, data) {
+        //    if (err) {
+        //        // error handling code goes here
+        //        console.log("ERROR : ", err);
+        //    }
+        //});
+
+        io.sockets.in(msg.ID).emit('style feature', ({ Guid: msg.Guid, Colour: msg.Colour}));
+    });
+
 });
 
     http.listen(3000, function () {
