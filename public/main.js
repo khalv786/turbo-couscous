@@ -13,6 +13,8 @@ var initialLoad = true;
 var UniqueAttributes = [];
 var originalFeatureStyle;
 var fill 
+// global so we can remove it later
+var draw;
 
 // when the page first loads
 window.onload = function init() {
@@ -118,9 +120,16 @@ function newProject() {
     fillProjectLabel();
 }
 
-function styleFeature(SelectedFeature, width) {
+
+function returnFillColour(Feature) {
     var style = SelectedFeature.getStyle();
     fill = style.fill_.color_;
+    return fill;
+}
+
+
+function styleFeature(SelectedFeature, width) {
+    fill = returnFillColour(SelectedFeature);
     var featureStyle = new ol.style.Style({
         fill: new ol.style.Fill({ color: fill }),
         stroke: new ol.style.Stroke({
@@ -134,7 +143,9 @@ function styleFeature(SelectedFeature, width) {
 
 function clientStyleFeature(guid, colour) {
     var features = returnFeatureList();
-
+    colour = ol.color.asArray(colour);
+    colour = colour.slice();
+    colour[3] = 0.2;
     for (var i = 0, l = features.length; i < l; i++) {
         var feature = features[i];
         var Guid = feature.get('guid');
@@ -264,6 +275,7 @@ function applyStyle() {
                 var e = document.getElementById("colourPicker" + j);
                 var colour = e.options[e.selectedIndex].text;
                 colour = colourNameToHex(colour);
+                var hex = colour;
                 colour = ol.color.asArray(colour);
                 colour = colour.slice();
                 colour[3] = 0.2;
@@ -277,7 +289,7 @@ function applyStyle() {
                     
                 });
                 feature.setStyle(style);
-                socket.emit('style feature', ({ ID: projectID, Guid: guid, Colour: colour }));
+                socket.emit('style feature', ({ ID: projectID, Guid: guid, Colour: hex }));
             }
     }
 }
@@ -395,12 +407,16 @@ function removeFeature(msg) {
 }
 
 //redraw shape using the geometry provided
-function redrawShape(geom, Guid, Value) {
+function redrawShape(geom, Guid, Value, Colour) {
     wkt = new ol.format.WKT;
     var feature = wkt.readFeature(geom);
     feature.set("guid", Guid);
     feature.set(attribute, Value);
+
     source.addFeature(feature);
+    if (Colour != undefined) {
+        clientStyleFeature(Guid, Colour);
+    }
 }
 
 function modifyShape(geom, Guid) {
@@ -419,7 +435,7 @@ function modifyShape(geom, Guid) {
     redrawShape(geom, Guid, value);
 }
 
-function guid() {
+function createGuid() {
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
         s4() + '-' + s4() + s4() + s4();
 }
@@ -456,12 +472,7 @@ function addAttribute() {
 function addValue() {
     return prompt("Enter the value of the " + attribute);
 }
-
-
-
-
-    // global so we can remove it later
-    var draw; 
+ 
     function drawShape(value) {
         //select the type of shape to draw
         var value = value;
@@ -479,7 +490,7 @@ function addValue() {
                 if (attribute != undefined) {
                     var attributeValue = addValue();
                 }
-                var id = guid();
+                var id = createGuid();
 
                 // retrieve the feature
                 var feature = event.feature
@@ -488,12 +499,13 @@ function addValue() {
                     feature.set(attribute, attributeValue);
                 }
                 
-                var newFeature = feature;
+                //var newFeature = feature;
                 var type = feature.getGeometry().getType();
                 //remove the draw interaction
                 map.removeInteraction(draw);
                 setProperties(feature);
                 var wktRepresenation = WKTRepresentation(feature);
+                
                 //emit the feature and project ID to other clients
                 socket.emit('new feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type, Value: attributeValue }));
             });

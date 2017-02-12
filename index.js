@@ -66,6 +66,16 @@ function updateFeature(guid, newGeometry, callback) {
     });
 }
 
+//update geometry of feature in database
+function styleFeature(guid, colour, callback) {
+    client.query("UPDATE features SET colour = '" + colour + "' WHERE  guid = '" + guid + "';", function (err, result) {
+        if (err)
+            callback(err, null);
+        else
+            callback(null, result);
+    });
+}
+
 function deleteFeature(guid, callback) {
     client.query("DELETE FROM features WHERE guid = '" + guid + "';", function (err, result) {
         if (err)
@@ -189,12 +199,12 @@ io.on('connection', function (socket) {
 
     socket.on('style feature', function (msg) {
 
-        //styleFeature(msg.Guid, function (err, data) {
-        //    if (err) {
-        //        // error handling code goes here
-        //        console.log("ERROR : ", err);
-        //    }
-        //});
+        styleFeature(msg.Guid, msg.Colour, function (err, data) {
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR : ", err);
+            }
+        });
 
         io.sockets.in(msg.ID).emit('style feature', ({ Guid: msg.Guid, Colour: msg.Colour}));
     });
