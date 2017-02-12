@@ -78,26 +78,28 @@ window.onload = function init() {
 
  // select interaction on map
  selectSingleClick = new ol.interaction.Select();
-    selectSingleClick.on('select', function (e) {
-        SelectedFeature = e.selected[0];
-        if (SelectedFeature instanceof ol.Feature) {
-            var style = SelectedFeature.getStyle();
-            fill = style.fill_.color_;
-            SelectedFeature.setStyle(styleFeature(fill, 2));
-            
+
+
+ selectSingleClick.on('select', function (e) {
+     if (SelectedFeature instanceof ol.Feature) {
+         SelectedFeature = styleFeature(SelectedFeature, 1.25);
+         SelectedFeature = undefined;         
+     }
+     SelectedFeature = e.selected[0];
+     if (SelectedFeature instanceof ol.Feature) {
+            SelectedFeature = styleFeature(SelectedFeature, 2);            
             //display area of feature 
-            setArea(SelectedFeature.getGeometry().getArea());
-           
+            setArea(SelectedFeature.getGeometry().getArea());           
             setProperties(SelectedFeature);
 
         } else {
             SelectedFeature = e.deselected[0];
             //remove area if no feature is selected
             removeArea();
-            //FeatureToBuffer = null;
             removeProperties();
-            SelectedFeature.setStyle(styleFeature(fill, 1.25));
+            SelectedFeature = styleFeature(SelectedFeature,1.25);
             SelectedFeature = undefined;
+            //selectSingleClick.getFeatures().clear();
 
         }
         
@@ -116,18 +118,20 @@ function newProject() {
     socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute});
     //display project name
     fillProjectLabel();
-    
 }
 
-function styleFeature(colour, width) {
+function styleFeature(SelectedFeature, width) {
+    var style = SelectedFeature.getStyle();
+    fill = style.fill_.color_;
     var featureStyle = new ol.style.Style({
-        fill: new ol.style.Fill({ color: colour }),
+        fill: new ol.style.Fill({ color: fill }),
         stroke: new ol.style.Stroke({
             width: width,
             color: '#3399CC'
         })
     });
-    return featureStyle;
+    SelectedFeature.setStyle(featureStyle);
+    return SelectedFeature;
 }
 
 
