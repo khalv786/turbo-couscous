@@ -5,6 +5,13 @@
  list-style: none;
  }
 
+footer {
+    position: fixed;
+    height: 100px;
+    bottom: 0;
+    width: 100%;
+}
+
 .ol-popup {
     position: absolute;
     min-width: 180px;

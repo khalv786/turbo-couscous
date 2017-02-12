@@ -500,14 +500,14 @@ function addValue() {
                 }
                 
                 //var newFeature = feature;
-                var type = feature.getGeometry().getType();
+                //var type = feature.getGeometry().getType();
                 //remove the draw interaction
                 map.removeInteraction(draw);
                 setProperties(feature);
                 var wktRepresenation = WKTRepresentation(feature);
                 
                 //emit the feature and project ID to other clients
-                socket.emit('new feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Type: type, Value: attributeValue }));
+                socket.emit('new feature', ({ ID: projectID, Geometry: wktRepresenation, Guid: id, Value: attributeValue }));
             });
         }
     }
@@ -551,8 +551,6 @@ function addValue() {
             var format = new ol.format.WKT();
             redrawShape(value.geometry, value.guid, value.value, value.colour);
         }
-
-
     });
 
     socket.on('style feature', function (msg) {
