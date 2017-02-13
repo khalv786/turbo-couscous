@@ -191,10 +191,10 @@ function openProject() {
     project = prompt("Enter the project name you would like to open");
     clearFeatures();
     //emit project to open
-    socket.emit('JoinRoom', { Name: project, CurrentProject: projectID});
+    socket.emit('JoinRoom', { Name: project, CurrentProject: projectID, RandomID: createGuid()});
     //display project name
-    displayMap();
-    fillProjectLabel();
+    //displayMap();
+    //fillProjectLabel();
 }
 
 function clearFeatures() {
@@ -560,7 +560,13 @@ function addValue() {
         removeFeature(msg);
     });
 
+    socket.on('No project found', function (msg) {
+        alert("Project not found");
+    });
+
     socket.on('features', function (msg) {
+        displayMap();
+        fillProjectLabel();
         console.log(msg);
         var geom;
         var i;

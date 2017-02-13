@@ -125,11 +125,12 @@ io.on('connection', function (socket) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
             } else {            
-                // extract just the value
-                var id = extractValue(data.rows);
-                var attribute = data.rows.map(function (a) { return a.attribute; });
-                attribute = attribute[0];
-                if (room.CurrentProject != "") {
+                try {
+                    // extract just the value
+                    var id = extractValue(data.rows);
+                    var attribute = data.rows.map(function (a) { return a.attribute; });
+                    attribute = attribute[0];
+                    if (room.CurrentProject != "") {
                     socket.leave(room.CurrentProject);
                     console.log("user left room:" + room.CurrentProject);
                 }
@@ -138,6 +139,14 @@ io.on('connection', function (socket) {
                 io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: attribute });
 
                 var features = returnFeatures(id);
+                }
+                catch (err) {
+                    // no room found
+                    socket.join(room.RandomID);
+                    io.sockets.in(room.RandomID).emit('No project found', { err });
+                    socket.leave(room.RandomID);
+                }
+
             }
         });
     });
