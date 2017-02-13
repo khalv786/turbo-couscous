@@ -18,7 +18,7 @@ var draw;
 
 // when the page first loads
 window.onload = function init() {
-    
+    hideMap();
     //create a base vector layer to draw on
     vector = new ol.layer.Vector({
         source: source,
@@ -84,14 +84,16 @@ window.onload = function init() {
 
  selectSingleClick.on('select', function (e) {
      if (SelectedFeature instanceof ol.Feature) {
-         SelectedFeature = styleFeature(SelectedFeature, 1.25);
+         SelectedFeature = styleFeature(SelectedFeature, 1.25, null);
          SelectedFeature = undefined;         
      }
      SelectedFeature = e.selected[0];
      if (SelectedFeature instanceof ol.Feature) {
-            SelectedFeature = styleFeature(SelectedFeature, 2);            
+            SelectedFeature = styleFeature(SelectedFeature, 2, null);            
             //display area of feature 
-            setArea(SelectedFeature.getGeometry().getArea());           
+            if (SelectedFeature.getGeometry().getType() != 'Point') {
+                setArea(SelectedFeature.getGeometry().getArea());
+            }           
             setProperties(SelectedFeature);
 
         } else {
@@ -99,7 +101,7 @@ window.onload = function init() {
             //remove area if no feature is selected
             removeArea();
             removeProperties();
-            SelectedFeature = styleFeature(SelectedFeature,1.25);
+            SelectedFeature = styleFeature(SelectedFeature,1.25, null);
             SelectedFeature = undefined;
         }
         
@@ -118,27 +120,52 @@ function newProject() {
     //emit new project
     socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute});
     //display project name
+    displayMap();
     fillProjectLabel();
+}
+
+function displayMap() {
+    document.getElementById('edit').style.visibility = "visible";
+    document.getElementById('mapSection').style.visibility = "initial";
+
+}
+
+function hideMap() {
+    document.getElementById('mapSection').style.visibility = "hidden";
+    document.getElementById('edit').style.visibility = "hidden";
 }
 
 
 function returnFillColour(Feature) {
-    var style = Feature.getStyle();
-    fill = style.fill_.color_;
-    return fill;
+    try {
+
+        var style = Feature.getStyle();
+        fill = style.fill_.color_;
+        return fill;
+    } catch (err) {
+
+    }
 }
 
 
-function styleFeature(SelectedFeature, width) {
-    fill = returnFillColour(SelectedFeature);
-    var featureStyle = new ol.style.Style({
-        fill: new ol.style.Fill({ color: fill }),
-        stroke: new ol.style.Stroke({
-            width: width,
-            color: '#3399CC'
-        })
-    });
-    SelectedFeature.setStyle(featureStyle);
+function styleFeature(SelectedFeature, width, colour) {
+    if (colour == null) {
+        fill = returnFillColour(SelectedFeature);
+    }
+    else {
+        fill = colour;
+    }
+    if (SelectedFeature.getGeometry().getType() != "Point" && fill != undefined) {
+        
+        var featureStyle = new ol.style.Style({
+            fill: new ol.style.Fill({ color: fill }),
+            stroke: new ol.style.Stroke({
+                width: width,
+                color: '#3399CC'
+            })
+        });
+        SelectedFeature.setStyle(featureStyle);
+    }
     return SelectedFeature;
 }
 
@@ -150,18 +177,9 @@ function clientStyleFeature(guid, colour) {
     for (var i = 0, l = features.length; i < l; i++) {
         var feature = features[i];
         var Guid = feature.get('guid');
-        if (Guid == guid) {
-           
-            style = new ol.style.Style({
-                //I don't know how to get the color of your kml to fill each room
-                fill: new ol.style.Fill({ color: colour }),
-                stroke: new ol.style.Stroke({
-                    color: '#3399CC',
-                    width: 1.25
-                }),
+        if (Guid == guid) {           
+            styleFeature(feature, 1.25, colour);
 
-            });
-             feature.setStyle(style);
         }
     }       
 }
@@ -175,6 +193,7 @@ function openProject() {
     //emit project to open
     socket.emit('JoinRoom', { Name: project, CurrentProject: projectID});
     //display project name
+    displayMap();
     fillProjectLabel();
 }
 
@@ -234,7 +253,8 @@ function bufferfeature() {
 function styleFeatures() {
     features = returnFeatureList();
 
-    
+    UniqueAttributes = [];
+    $(".table-bordered tbody").empty();
     var value;
     var isInside;
     for (var i = 0, l = features.length; i < l; i++) {
@@ -246,9 +266,6 @@ function styleFeatures() {
             UniqueAttributes.push(value);
         }
     }
-    console.log(UniqueAttributes);
-
-    //var string = $('html').attr('class');
 
 
     for (var i = 0; i < UniqueAttributes.length; i++) {
@@ -285,16 +302,8 @@ function applyStyle() {
                 colour = ol.color.asArray(colour);
                 colour = colour.slice();
                 colour[3] = 0.2;
-                style = new ol.style.Style({
-                    //I don't know how to get the color of your kml to fill each room
-                    fill: new ol.style.Fill({ color: colour }),
-                    stroke: new ol.style.Stroke({
-                        color: '#3399CC',
-                        width: 1.25
-                    }),
-                    
-                });
-                feature.setStyle(style);
+                styleFeature(feature, 1.25, colour);
+
                 socket.emit('style feature', ({ ID: projectID, Guid: guid, Colour: hex }));
             }
     }
@@ -461,18 +470,21 @@ function WKTRepresentation(feature) {
 
 function addAttribute() {
     
-    var attributes = ""
+    var attribute;
     while (true) {
         var addAttribute = confirm("Would you like to add attributes to the feature");
         if (addAttribute == true) {
             var AttributeName = prompt("What is the name of the attribute");
             
-            attributes = AttributeName;
+            attribute = AttributeName;
             break;
            
-        } else { break;}
+        } else {
+            //return attribute;
+            break;
+        }
     }
-    return attributes;
+    return attribute;
 }
 
 function addValue() {
