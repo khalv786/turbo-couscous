@@ -12,13 +12,14 @@ var selectSingleClick;
 var initialLoad = true;
 var UniqueAttributes = [];
 var originalFeatureStyle;
-var fill 
+var fill;
 // global so we can remove it later
 var draw;
+var nickName = "";
 
 // when the page first loads
 window.onload = function init() {
-    hideMap();
+    createName();
     //create a base vector layer to draw on
     vector = new ol.layer.Vector({
         source: source,
@@ -110,7 +111,22 @@ window.onload = function init() {
  map.addInteraction(selectSingleClick);
 };
 
+function createName() {
 
+    while (nickName == "") {
+        nickName = prompt("What is your name");
+    } 
+}
+
+
+function appendUser(nickName) {
+    var trd = "";
+    trd += "<tr>";
+    trd += "<td><label id=value>" + nickName + " <label> </td>";
+    trd += "</tr>";
+
+    $(".table-inverse tbody").append(trd);
+}
 
 function newProject() {
     //prompt for user to enter map name
@@ -118,23 +134,17 @@ function newProject() {
     clearFeatures();
     var attribute = addAttribute();
     //emit new project
-    socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute});
+    socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute, NickName: nickName});
     //display project name
     displayMap();
     fillProjectLabel();
 }
 
 function displayMap() {
-    document.getElementById('edit').style.visibility = "visible";
-    document.getElementById('mapSection').style.visibility = "initial";
+    //document.getElementById('edit').style.visibility = "visible";
+    document.getElementById('mapSection').style.visibility = "visible";
 
 }
-
-function hideMap() {
-    document.getElementById('mapSection').style.visibility = "hidden";
-    document.getElementById('edit').style.visibility = "hidden";
-}
-
 
 function returnFillColour(Feature) {
     try {
@@ -189,13 +199,12 @@ function openProject() {
    
     //enter name of the project the user would like to open
     project = prompt("Enter the project name you would like to open");
-    clearFeatures();
+    
     //emit project to open
-    socket.emit('JoinRoom', { Name: project, CurrentProject: projectID, RandomID: createGuid()});
-    //display project name
-    //displayMap();
-    //fillProjectLabel();
+    socket.emit('JoinRoom', { Name: project, CurrentProject: projectID, RandomID: createGuid() , NickName: nickName});
 }
+
+
 
 function clearFeatures() {
     source.clear();
@@ -207,10 +216,11 @@ function fillProjectLabel(){
     projectName.innerText = project;
 }
 
-function fillID(id, attributeP) {
+function fillID(id, attributeP, nickName) {
     projectID = id;
     attribute = attributeP;
     console.log(projectID, attribute);
+    appendUser(nickName);
 }
 
 function notImplemented() {
@@ -352,13 +362,6 @@ function contains(a, obj) {
     }
     return false;
 }
-
-function clients() {
-    var clients = io.of('/chat').clients();
-    var clients = io.of('/chat').clients('room'); // all users from room `room`
-    document.getElementById("clients").innerHTML = clients;
-}
-
 
 //remove area from label
 function removeArea() {
@@ -549,7 +552,7 @@ function addValue() {
     });
 
     socket.on('send ID to client', function (data) {
-        fillID(data.ID, data.ATTRIBUTE);
+        fillID(data.ID, data.ATTRIBUTE, data.NICKNAME);
     });
 
     socket.on('chat message', function (msg) {
@@ -565,6 +568,7 @@ function addValue() {
     });
 
     socket.on('features', function (msg) {
+        clearFeatures();
         displayMap();
         fillProjectLabel();
         console.log(msg);

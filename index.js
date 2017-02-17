@@ -1,6 +1,6 @@
 //declare global variables
 var express = require('express');
-var $ = require('jquery');
+//var $ = require('jquery');
 var fs = require('fs');
 var path = require('path'); 
 var app = express();
@@ -136,7 +136,7 @@ io.on('connection', function (socket) {
                 }
                 console.log("user joined :" + id);
                 socket.join(id);
-                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: attribute });
+                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: attribute, NICKNAME: room.NickName });
 
                 var features = returnFeatures(id);
                 }
@@ -170,7 +170,7 @@ io.on('connection', function (socket) {
                 //open project
                 socket.join(id);
                 //send mapID to client
-                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: room.Attribute });
+                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: room.Attribute, NICKNAME: room.NickName });
             }
         });
     });

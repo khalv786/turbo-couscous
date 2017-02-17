@@ -1,15 +1,23 @@
 ﻿body {
+    height: 100%;
 }
+
+ #wrap {
+        min-height: 100%;
+        height: auto !important;
+        height: 100%;
+        /* Negative indent footer by it's height */
+        margin: 0 auto -60px;
+      }
+
 
  ul {
  list-style: none;
  }
 
-footer {
-    position: fixed;
-    height: 100px;
-    bottom: 0;
-    width: 100%;
+#push,
+#footer {
+    height: 60px;  
 }
 
 .ol-popup {
