@@ -119,25 +119,38 @@ function createName() {
 }
 
 
-function appendUser(nickName) {
-    var trd = "";
+function appendUser(users) {
+    $(".table-inverse tbody").empty();
+    for (var i = 0; i < users.length; i++){
+        var record = users[i];
+        if (record[0] == projectID) {
+           
+                var editing = record[1];
+                console.log(editing);
+                var trd = "";
     trd += "<tr>";
-    trd += "<td><label id=value>" + nickName + " <label> </td>";
+    trd += "<td><label id=value>" + editing + " <label> </td>";
     trd += "</tr>";
 
     $(".table-inverse tbody").append(trd);
+            
+        }
+    }
+
 }
 
 function newProject() {
     //prompt for user to enter map name
     project = prompt("Enter Name of Map");
-    clearFeatures();
-    var attribute = addAttribute();
-    //emit new project
-    socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute, NickName: nickName});
-    //display project name
-    displayMap();
-    fillProjectLabel();
+    if (project) {
+        clearFeatures();
+        var attribute = addAttribute();
+        //emit new project
+        socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute, NickName: nickName });
+        //display project name
+        displayMap();
+        fillProjectLabel();
+    }
 }
 
 function displayMap() {
@@ -199,9 +212,11 @@ function openProject() {
    
     //enter name of the project the user would like to open
     project = prompt("Enter the project name you would like to open");
-    
-    //emit project to open
-    socket.emit('JoinRoom', { Name: project, CurrentProject: projectID, RandomID: createGuid() , NickName: nickName});
+
+    if (project) {
+        //emit project to open
+        socket.emit('JoinRoom', { Name: project, CurrentProject: projectID, RandomID: createGuid(), NickName: nickName });
+    }
 }
 
 
@@ -216,11 +231,12 @@ function fillProjectLabel(){
     projectName.innerText = project;
 }
 
-function fillID(id, attributeP, nickName) {
+function fillID(id, attributeP, users) {
+
     projectID = id;
     attribute = attributeP;
-    console.log(projectID, attribute);
-    appendUser(nickName);
+
+    appendUser(users);
 }
 
 function notImplemented() {
@@ -542,6 +558,11 @@ function addValue() {
         return false;
     });
 
+    socket.on('update editors', function (msg) {
+        //msg.USERS;
+        appendUser(msg.USERS);
+    });
+
     socket.on('new feature', function (msg) {
         redrawShape(msg.Geometry, msg.Guid, msg.Value);
     });
@@ -552,7 +573,7 @@ function addValue() {
     });
 
     socket.on('send ID to client', function (data) {
-        fillID(data.ID, data.ATTRIBUTE, data.NICKNAME);
+        fillID(data.ID, data.ATTRIBUTE, data.USERS);
     });
 
     socket.on('chat message', function (msg) {

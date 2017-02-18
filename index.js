@@ -6,7 +6,9 @@ var path = require('path');
 var app = express();
 var http = require('http').Server(app);
 var results = [];
-var numUsers = 0;
+//var numUsers = 0;
+
+var users = [[]];
  
 
 var pg = require("pg");
@@ -101,7 +103,7 @@ function returnFeatures(projectID) {
         console.log(result.rows); // outputs: { name: 'brianc' }
         io.sockets.in(projectID).emit('features', result.rows);
     });
-       }
+}
 
 io.on('connection', function (socket) {
 
@@ -118,27 +120,29 @@ io.on('connection', function (socket) {
             }
         })
     });
+
     //when user opens a project
     socket.on('JoinRoom', function (room) {
         returnMapIDandAttribute(room.Name, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
-            } else {            
+            } else {
                 try {
                     // extract just the value
                     var id = extractValue(data.rows);
                     var attribute = data.rows.map(function (a) { return a.attribute; });
                     attribute = attribute[0];
                     if (room.CurrentProject != "") {
-                    socket.leave(room.CurrentProject);
-                    console.log("user left room:" + room.CurrentProject);
-                }
-                console.log("user joined :" + id);
-                socket.join(id);
-                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: attribute, NICKNAME: room.NickName });
+                        socket.leave(room.CurrentProject);
+                        console.log("user left room:" + room.CurrentProject);
+                    }
+                    console.log("user joined :" + id);
+                    users.push([id, room.NickName, socket.id]);
+                    socket.join(id);
+                    io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: attribute, NICKNAME: room.NickName, USERS: users });
 
-                var features = returnFeatures(id);
+                    var features = returnFeatures(id);
                 }
                 catch (err) {
                     // no room found
@@ -161,16 +165,18 @@ io.on('connection', function (socket) {
             } else {            
                 //extract value
                 var id = extractValue(data.rows);
-                
+
                 if (room.CurrentProject != "") {
                     socket.leave(room.CurrentProject);
                     console.log("user left room:" + room.CurrentProject);
                 }
                 console.log("user created and joined :" + id);
+                users.push([id, room.NickName, socket.id]);
                 //open project
                 socket.join(id);
                 //send mapID to client
-                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: room.Attribute, NICKNAME: room.NickName });
+                io.sockets.in(id).emit('send ID to client', { ID: id, ATTRIBUTE: room.Attribute, NICKNAME: room.NickName, USERS: users });
+
             }
         });
     });
@@ -179,7 +185,7 @@ io.on('connection', function (socket) {
 
         insertFeature(msg.ID, msg.Geometry, msg.Guid, msg.Value)
 
-        io.sockets.in(msg.ID).emit('new feature', ({ Geometry: msg.Geometry, Guid: msg.Guid, Value: msg.Value}));
+        io.sockets.in(msg.ID).emit('new feature', ({ Geometry: msg.Geometry, Guid: msg.Guid, Value: msg.Value }));
     });
 
     socket.on('update feature', function (msg) {
@@ -204,6 +210,22 @@ io.on('connection', function (socket) {
         });
 
         io.sockets.in(msg.ID).emit('delete feature', ({ Guid: msg.Guid }));
+    });
+
+    socket.on('disconnect', function () {
+        console.log(socket.id);
+        var projectID;
+        for (var i in users) {
+            var user = users[i];
+            
+            if (user[2] == socket.id) {
+                projectID = user[0]
+                users.splice(i, 1);
+                break;
+            }
+        }
+        console.log(users);
+        io.sockets.in(projectID).emit('update editors', ({ USERS: users }));
     });
 
     socket.on('style feature', function (msg) {
