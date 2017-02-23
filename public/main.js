@@ -7,7 +7,7 @@ var SelectedFeature;
 var project;
 var projectID = "";
 var vector;
-var attribute = ""
+var attribute = "undefined";
 var selectSingleClick;
 var initialLoad = true;
 var UniqueAttributes = [];
@@ -126,7 +126,7 @@ function appendUser(users) {
         if (record[0] == projectID) {
            
                 var editing = record[1];
-                console.log(editing);
+               // console.log(editing);
                 var trd = "";
     trd += "<tr>";
     trd += "<td><label id=value>" + editing + " <label> </td>";
@@ -144,7 +144,7 @@ function newProject() {
     project = prompt("Enter Name of Map");
     if (project) {
         clearFeatures();
-        var attribute = addAttribute();
+        addAttribute();
         //emit new project
         socket.emit('new project', { Name: project, CurrentProject: projectID, Attribute: attribute, NickName: nickName });
         //display project name
@@ -250,9 +250,9 @@ function bufferfeature() {
         do {
             var bufferAmount = parseInt(window.prompt("Please enter a value to buffer by in metres", ""), 10);
         } while (isNaN(bufferAmount));
-
+       
         var guid = SelectedFeature.get("guid");
-  
+
         //create parser
         var parser = new jsts.io.OL3Parser();
         //ask parser to read the geometry of the feature
@@ -392,7 +392,7 @@ function setArea(area) {
 
 function setProperties(feature) {
     var guid = feature.get("guid");
-    if (attribute != undefined) {
+    if (attribute != "undefined") {
         var attributeValue = feature.get(attribute);
         document.getElementById("properties").innerHTML = "ID: " + guid + "\n" + attribute + ": " + attributeValue;
     } else {
@@ -461,12 +461,16 @@ function modifyShape(geom, Guid) {
         var feature = features[i];
         var guid = feature.get("guid")
         if (guid == Guid) {
+            //feature.setGeometry(geom);
             var value = feature.get(attribute);
+           
+            var fill = returnFillColour(feature);
             source.removeFeature(feature);
+           redrawShape(geom, Guid, value, fill);
         }
         break;
     }
-    redrawShape(geom, Guid, value);
+
 }
 
 function createGuid() {
@@ -489,7 +493,7 @@ function WKTRepresentation(feature) {
 
 function addAttribute() {
     
-    var attribute;
+   // var attribute;
     while (true) {
         var addAttribute = confirm("Would you like to add attributes to the feature");
         if (addAttribute == true) {
@@ -503,7 +507,7 @@ function addAttribute() {
             break;
         }
     }
-    return attribute;
+   // return attribute;
 }
 
 function addValue() {
@@ -524,7 +528,7 @@ function addValue() {
             //after drawing the feature
             draw.on('drawend', function (event) {
 
-                if (attribute != undefined) {
+                if (attribute != "undefined") {
                     var attributeValue = addValue();
                 }
                 var id = createGuid();
@@ -532,12 +536,10 @@ function addValue() {
                 // retrieve the feature
                 var feature = event.feature
                 feature.set("guid", id);
-                if (attributeValue != undefined) {
+                if (attributeValue != "") {
                     feature.set(attribute, attributeValue);
                 }
-                
-                //var newFeature = feature;
-                //var type = feature.getGeometry().getType();
+               
                 //remove the draw interaction
                 map.removeInteraction(draw);
                 setProperties(feature);
@@ -592,7 +594,7 @@ function addValue() {
         clearFeatures();
         displayMap();
         fillProjectLabel();
-        console.log(msg);
+       // console.log(msg);
         var geom;
         var i;
         for (i = 0; i < msg.length; i++) {

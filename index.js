@@ -1,6 +1,6 @@
 //declare global variables
 var express = require('express');
-//var $ = require('jquery');
+
 var fs = require('fs');
 var path = require('path'); 
 var app = express();
@@ -190,7 +190,7 @@ io.on('connection', function (socket) {
 
     socket.on('update feature', function (msg) {
 
-        updateFeature(msg.Geometry, msg.Guid, function (err, data) {
+        updateFeature(msg.Guid, msg.Geometry, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);
