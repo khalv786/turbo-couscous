@@ -59,8 +59,18 @@ function insertFeature(mapid, geometry, guid, value) {
 }
 
 //update geometry of feature in database
-function updateFeature(guid, newGeometry, callback) {
+function updateFeatureGeometry(guid, newGeometry, callback) {
     client.query("UPDATE features SET geometry = '" + newGeometry + "'::text || geometry WHERE  guid = '" + guid + "';", function (err, result) {
+        if (err)
+            callback(err, null);
+        else
+            callback(null, result);
+    });
+}
+
+//update geometry of feature in database
+function updateFeatureValue(guid, value, callback) {
+    client.query("UPDATE features SET value = '" + value + "' WHERE  guid = '" + guid + "';", function (err, result) {
         if (err)
             callback(err, null);
         else
@@ -188,9 +198,21 @@ io.on('connection', function (socket) {
         io.sockets.in(msg.ID).emit('new feature', ({ Geometry: msg.Geometry, Guid: msg.Guid, Value: msg.Value }));
     });
 
+    socket.on('update feature value', function (msg) {
+
+        updateFeatureValue(msg.Guid, msg.Value, function (err, data) {
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR : ", err);
+            }
+        });
+
+        io.sockets.in(msg.ID).emit('update feature value', ({ Guid: msg.Guid, Value: msg.Value }));
+    });
+
     socket.on('update feature', function (msg) {
 
-        updateFeature(msg.Guid, msg.Geometry, function (err, data) {
+        updateFeatureGeometry(msg.Guid, msg.Geometry, function (err, data) {
             if (err) {
                 // error handling code goes here
                 console.log("ERROR : ", err);

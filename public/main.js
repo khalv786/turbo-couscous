@@ -19,6 +19,7 @@ var nickName = "";
 
 // when the page first loads
 window.onload = function init() {
+   
     createName();
     //create a base vector layer to draw on
     vector = new ol.layer.Vector({
@@ -57,8 +58,17 @@ window.onload = function init() {
      debug: true,
      autoComplete: true,
      keepOpen: true
- });
+    });
+
+
  map.addControl(geocoder);
+ //Listen when an address is chosen
+ geocoder.on('addresschosen', function (evt) {
+     var feature = evt.feature,
+         coord = evt.coordinate;
+     content.innerHTML = '<p>' + evt.address.formatted + '</p>';
+     overlay.setPosition(coord);
+ });
 
  /**
 * Popup
@@ -75,6 +85,12 @@ window.onload = function init() {
      closer.blur();
      return false;
  };
+
+
+ /**
+* Popup
+**/
+
  map.addOverlay(overlay);
 
  var select = null;  // ref to currently selected interaction
@@ -113,9 +129,10 @@ window.onload = function init() {
 
 function createName() {
 
-    while (nickName == "") {
+    do {
         nickName = prompt("What is your name");
-    } 
+    } while (nickName == null || nickName == "");
+
 }
 
 
@@ -154,7 +171,7 @@ function newProject() {
 }
 
 function displayMap() {
-    //document.getElementById('edit').style.visibility = "visible";
+    
     document.getElementById('mapSection').style.visibility = "visible";
 
 }
@@ -390,6 +407,20 @@ function setArea(area) {
     document.getElementById("area").innerHTML = "Selected Area: " + areaSqKm + " km<sup>2</sup>";
 }
 
+function editAttributeValue() {
+    if (SelectedFeature != null) {
+        //loop until a numeric value is entered
+        var value = prompt("Update value for " + attribute);
+        SelectedFeature.set(attribute, value);
+        var id = SelectedFeature.get("guid");
+        setProperties(SelectedFeature);
+        socket.emit('update feature value', ({ ID: projectID, Guid: id, Value: value }));
+        
+    } else {
+        alert("No feature selected");
+    }
+}
+
 function setProperties(feature) {
     var guid = feature.get("guid");
     if (attribute != "undefined") {
@@ -415,8 +446,9 @@ function deletefeature() {
             if (guid == id) {
                 vector.getSource().removeFeature(feature);
                 socket.emit('delete feature', ({ ID: projectID, Guid: id }));
+                 break;
             }
-            break;
+           
         }
     }
 }
@@ -435,8 +467,9 @@ function removeFeature(msg) {
         var guid = feature.get("guid")
         if (guid == msg.Guid) {
             vector.getSource().removeFeature(feature);
+            break;
         }
-        break;
+        
     }
 }
 
@@ -456,7 +489,7 @@ function redrawShape(geom, Guid, Value, Colour) {
 function modifyShape(geom, Guid) {
     var features = selectSingleClick.getFeatures();
     features.clear();
-    var features = source.getFeatures();
+    var features = returnFeatureList();
     for (var i = 0, l = features.length; i < l; i++) {
         var feature = features[i];
         var guid = feature.get("guid")
@@ -508,6 +541,18 @@ function addAttribute() {
         }
     }
    // return attribute;
+}
+
+function updateValue(Guid, value) {
+    var features = returnFeatureList();
+    for (var i = 0, l = features.length; i < l; i++) {
+        var feature = features[i];
+        var guid = feature.get("guid")
+        if (guid == Guid) {
+            feature.set(attribute, value);
+            setProperties(feature);      
+        }
+    }
 }
 
 function addValue() {
@@ -567,6 +612,10 @@ function addValue() {
 
     socket.on('new feature', function (msg) {
         redrawShape(msg.Geometry, msg.Guid, msg.Value);
+    });
+
+    socket.on('update feature value', function (msg) {
+        updateValue(msg.Guid, msg.Value);
     });
 
     socket.on('update feature', function (msg) {

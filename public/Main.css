@@ -11,16 +11,7 @@
       }
 
 
- ul {
- list-style: none;
- }
-
-#push,
-#footer {
-    height: 60px;  
-}
-
-.ol-popup {
+ .ol-popup {
     position: absolute;
     min-width: 180px;
     background-color: white;
@@ -62,3 +53,13 @@
 .ol-popup-closer:after {
     content: "✖";
 }
+
+ ul {
+ list-style: none;
+ }
+
+#push,
+#footer {
+    height: 60px;  
+}
+
