@@ -137,6 +137,10 @@ function createName() {
 
 
 function appendUser(users) {
+    var title = document.getElementById("crntEditing");
+    var numEditors = (users.length - 1);
+    console.log(numEditors);
+    title.innerHTML = "Currently Editing : " + numEditors;
     $(".table-inverse tbody").empty();
     for (var i = 0; i < users.length; i++){
         var record = users[i];
