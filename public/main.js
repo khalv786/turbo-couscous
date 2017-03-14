@@ -138,14 +138,14 @@ function createName() {
 
 function appendUser(users) {
     var title = document.getElementById("crntEditing");
-    var numEditors = (users.length - 1);
-    console.log(numEditors);
-    title.innerHTML = "Currently Editing : " + numEditors;
+    var numEditors = 0; 
+    //console.log(numEditors);
+    
     $(".table-inverse tbody").empty();
     for (var i = 0; i < users.length; i++){
         var record = users[i];
         if (record[0] == projectID) {
-           
+                numEditors++
                 var editing = record[1];
                // console.log(editing);
                 var trd = "";
@@ -157,6 +157,7 @@ function appendUser(users) {
             
         }
     }
+    title.innerHTML = "Currently Editing : " + numEditors;
 
 }
 
